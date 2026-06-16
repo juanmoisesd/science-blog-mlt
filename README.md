@@ -1,45 +1,33 @@
-# science-blog-mlt
+# Vetenskaplig Blogg om Psykologi och Neurovetenskap (Svenska)
 
+## Hur man citerar
 
-## How to Cite
+Om du använder denna resurs i din forskning, vänligen citera:
 
-If you use this repository in your research, please cite:
+> de la Serna, J. M. (2026). *Vetenskaplig Blogg Swe*. Universidad Internacional de La Rioja (UNIR).
+> https://github.com/juanmoisesd/science-blog-swe
 
-> de la Serna, J. M. (2026). *Science Blog Mlt*. Universidad Internacional de La Rioja (UNIR).
-> https://github.com/juanmoisesd/science-blog-mlt 
+Se `CITATION.cff` för formaterade referenser.
 
-See `CITATION.cff` for formatted references.
+## Översikt
+Detta arkiv innehåller data och resurser relaterade till en **vetenskaplig blogg på svenska**. Det är en del av ett öppet vetenskapligt initiativ för att dela forskningsresultat och dataset med det globala vetenskapliga samfundet.
 
-## Overview
-This repository contains data and resources related to **science blog mlt**. It is part of an open science initiative to share research findings and datasets with the global scientific community.
+## Forskningskontext
+Projektet adresserar nyckelfrågor inom neurovetenskap och samhällsvetenskap, med fokus på att tillhandahålla tillgänglig data för vidare analys och validering.
 
-## Research Context
-The project addresses key questions in the field of neuroscience and social sciences, focusing on providing accessible data for further analysis and validation.
+## Arkivstruktur
+- `psykologi/`: Innehåller 1 000 vetenskapliga artiklar om psykologi.
+- `neurovetenskap/`: Innehåller 1 000 vetenskapliga artiklar om neurovetenskap.
+- `css/`: Innehåller stilmallar för webbplatsen.
+- `index.html`: Landningssida.
+- `om-forfattaren.html`: Biografi om Dr. Juan Moisés de la Serna.
 
-## Repository Structure
-- `data/`: Contains the datasets used in this research.
-- `src/`: Source code for data processing and analysis.
-- `results/`: Output files, figures, and metrics.
+## Författare
+**Juan Moisés de la Serna**
+- Doktor i psykologi
+- Master i neurovetenskap och beteendebiologi
+- Universitetsprofessor
+- Vetenskaplig kommunikatör
 
-## Usage
-To use the resources in this repository, clone the project and ensure you have the necessary dependencies installed. Refer to the specific documentation in each folder for more details.
-
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Overview
-This repository contains data and resources related to **science blog mlt**. It is part of an open science initiative to share research findings and datasets with the global scientific community.
-
-## Research Context
-The project addresses key questions in the field of neuroscience and social sciences, focusing on providing accessible data for further analysis and validation.
-
-## Repository Structure
-- `data/`: Contains the datasets used in this research.
-- `src/`: Source code for data processing and analysis.
-- `results/`: Output files, figures, and metrics.
-
-## Usage
-To use the resources in this repository, clone the project and ensure you have the necessary dependencies installed. Refer to the specific documentation in each folder for more details.
-
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Licens
+Detta projekt är licensierat under MIT-licensen - se LICENSE-filen för detaljer.
