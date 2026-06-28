@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación del Experimento de Asch - Laboratorio de Psicología Social</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --warning-color: #f39c12;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        h1 { font-size: 1.5rem; }
+
+        #main-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 1rem;
+            padding: 1rem;
+            flex-grow: 1;
+        }
+
+        #simulations-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .simulation-instance {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: #fff;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .comparison-active #simulations-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .comparison-active .simulation-instance {
+            transform: scale(0.95);
+            transform-origin: top;
+        }
+
+        .instance-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            z-index: 100;
+        }
+
+        aside {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            max-height: calc(100vh - 100px);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 0.5rem;
+        }
+
+        #simulation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #asch-cards {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .card {
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            min-width: 200px;
+        }
+
+        .line-container {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px inset #eee;
+            margin-top: 10px;
+        }
+
+        .line-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .line {
+            width: 15px;
+            background-color: #333;
+            transition: height 0.3s ease;
+            position: relative;
+        }
+
+        .line.correct-highlight { background-color: var(--success-color); }
+        .line.error-highlight { background-color: var(--error-color); }
+
+        #experimental-room {
+            flex-grow: 1;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            min-height: 400px;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .participants-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 800px;
+        }
+
+        .avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar-container.active {
+            transform: scale(1.1);
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background-color: #ddd;
+            border-radius: 50%;
+            margin-bottom: 0.5rem;
+            position: relative;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .avatar.subject { border-color: var(--accent-color); background-color: #e1f5fe; }
+        .avatar.confederate { background-color: #f5f5f5; border-color: #ccc; }
+        .avatar.speaking { border-color: var(--warning-color); box-shadow: 0 0 15px var(--warning-color); }
+
+        /* Virtual Environments Styles */
+        .room-chat .participants-grid {
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 100%;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background: #fff;
+            justify-content: flex-start;
+        }
+        .room-chat .avatar-container {
+            flex-direction: row;
+            width: 100%;
+            gap: 15px;
+            margin-bottom: 10px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .room-chat .avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+        .room-chat .bubble {
+            position: static;
+            display: inline-block !important;
+            margin-left: 10px;
+            top: auto;
+            transform: none !important;
+            background: #e1f5fe;
+            border-radius: 4px 15px 15px 15px;
+        }
+        .room-chat .indicator-bar { display: none; }
+        .room-chat .label { display: none; }
+
+        .room-video .participants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        .room-video .avatar-container {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #2c3e50;
+            border: 2px solid #34495e;
+            border-radius: 4px;
+            justify-content: center;
+            padding: 10px;
+            flex-direction: column;
+        }
+        .room-video .avatar {
+            border-radius: 4px;
+            width: 70%;
+            height: 70%;
+            background-color: #34495e;
+        }
+        .room-video .bubble {
+            top: 5px;
+            left: 5px;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .indicator-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #eee;
+            margin-top: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .indicator-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .label { font-size: 0.7rem; color: #666; margin-top: 2px; }
+
+        .bubble {
+            position: absolute;
+            top: -40px;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-weight: bold;
+            z-index: 10;
+            display: none;
+        }
+
+        #interaction-area {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: translateY(1px); }
+        button.secondary { background-color: var(--secondary-color); }
+
+        .hidden { display: none !important; }
+
+        /* Stats visuals */
+        .stat-item {
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            padding: 0.8rem;
+            border-radius: 4px;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        .stat-label { font-size: 0.8rem; color: #777; text-transform: uppercase; }
+
+        canvas {
+            width: 100% !important;
+            height: 150px !important;
+            margin-top: 1rem;
+            background: #fff;
+            border: 1px solid #eee;
+        }
+
+        /* Modals */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #eee;
+            color: #333;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Controls styling */
+        .control-group { margin-bottom: 1.2rem; }
+        label { display: block; font-size: 0.9rem; margin-bottom: 0.3rem; font-weight: 600; }
+        input[type="range"] { width: 100%; }
+        .range-val { font-size: 0.8rem; float: right; color: var(--accent-color); }
+
+        /* Comparison Mode */
+        .comparison-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Simulación Interactiva: Experimento de Conformidad de Asch</h1>
+            <div class="header-controls">
+                <button id="btn-didactic" onclick="ui.toggleDidactic()">Explicar Experimento</button>
+                <button id="btn-mode-toggle" onclick="ui.toggleMode()">Cambiar a Modo Participante</button>
+            </div>
+        </header>
+
+        <main id="main-layout">
+            <aside id="control-panel">
+                <h2>Configuración</h2>
+                <div id="main-controls"></div>
+                <div class="control-group">
+                    <button class="secondary" id="btn-comparison-toggle" onclick="ui.toggleComparisonMode()" style="width:100%">Modo Comparación: OFF</button>
+                </div>
+            </aside>
+
+            <section id="simulations-wrapper">
+                <div id="sim-1" class="simulation-instance">
+                    <div class="asch-cards">
+                        <div class="card">
+                            <h3>Patrón</h3>
+                            <div class="line-container pattern-line-container"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Opciones</h3>
+                            <div class="line-container options-line-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="experimental-room"></div>
+
+                    <div class="interaction-area hidden">
+                        <h3>Tu respuesta:</h3>
+                        <div class="button-group">
+                            <button onclick="simulation1.userSelect('A')">A</button>
+                            <button onclick="simulation1.userSelect('B')">B</button>
+                            <button onclick="simulation1.userSelect('C')">C</button>
+                        </div>
+                    </div>
+                    <div class="instance-label">Simulación A (Sin Aliado)</div>
+                </div>
+
+                <div id="sim-2" class="simulation-instance hidden">
+                    <div class="asch-cards">
+                        <div class="card">
+                            <h3>Patrón</h3>
+                            <div class="line-container pattern-line-container"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Opciones</h3>
+                            <div class="line-container options-line-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="experimental-room"></div>
+
+                    <div class="interaction-area hidden">
+                        <h3>Tu respuesta:</h3>
+                        <div class="button-group">
+                            <button onclick="window.simulation2.userSelect('A')">A</button>
+                            <button onclick="window.simulation2.userSelect('B')">B</button>
+                            <button onclick="window.simulation2.userSelect('C')">C</button>
+                        </div>
+                    </div>
+                    <div class="instance-label">Simulación B (Con Aliado)</div>
+                </div>
+            </section>
+
+            <aside id="stats-panel">
+                <h2>Estadísticas</h2>
+                <div id="stats-content"></div>
+            </aside>
+        </main>
+
+        <div id="overlay" class="hidden" onclick="ui.closeOverlays()">
+            <div id="didactic-content" class="modal" onclick="event.stopPropagation()">
+                <!-- Didactic content will be here -->
+                <button class="close-btn" onclick="ui.closeOverlays()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Represents a participant in the experiment.
+         * Could be a confederate (actor) or the experimental subject.
+         */
+        class Participant {
+            constructor(id, isSubject = false) {
+                this.id = id;
+                this.isSubject = isSubject;
+                this.name = isSubject ? "Sujeto Experimental" : `Cómplice ${id}`;
+
+                // Internal psychological variables (0-100)
+                this.selfEsteem = 50 + (Math.random() * 40 - 20);
+                this.criticalThinking = 50 + (Math.random() * 40 - 20);
+                this.socialAnxiety = 30 + (Math.random() * 40 - 20);
+                this.needForAcceptance = 50 + (Math.random() * 40 - 20);
+
+                // State variables
+                this.currentPressure = 0;
+                this.currentAnxiety = this.socialAnxiety;
+                this.confidence = this.selfEsteem;
+                this.history = [];
+
+                this.element = null;
+            }
+
+            /**
+             * Updates internal state based on group pressure
+             */
+            updateState(groupPressure) {
+                if (!this.isSubject) return;
+
+                // Pressure increases anxiety and decreases confidence
+                this.currentPressure = groupPressure;
+                this.currentAnxiety = Math.min(100, this.socialAnxiety + (groupPressure * (this.needForAcceptance / 50)));
+                this.confidence = Math.max(0, this.selfEsteem - (groupPressure * (1 - this.criticalThinking / 100)));
+
+                this.updateUI();
+            }
+
+            render() {
+                const container = document.createElement('div');
+                container.className = 'avatar-container';
+                container.dataset.participantId = this.id;
+
+                const avatar = document.createElement('div');
+                avatar.className = `avatar ${this.isSubject ? 'subject' : 'confederate'}`;
+                avatar.textContent = this.isSubject ? "S" : this.id;
+
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+
+                container.appendChild(bubble);
+                container.appendChild(avatar);
+
+                if (this.isSubject) {
+                    const pressureBar = this.createIndicator('Presión', 'pressure-fill', 'var(--warning-color)');
+                    const anxietyBar = this.createIndicator('Ansiedad', 'anxiety-fill', 'var(--error-color)');
+                    container.appendChild(pressureBar);
+                    container.appendChild(anxietyBar);
+                }
+
+                this.element = container;
+                return container;
+            }
+
+            createIndicator(label, fillClass, color) {
+                const wrapper = document.createElement('div');
+                wrapper.style.width = '100%';
+
+                const labelElem = document.createElement('div');
+                labelElem.className = 'label';
+                labelElem.textContent = label;
+
+                const bar = document.createElement('div');
+                bar.className = 'indicator-bar';
+
+                const fill = document.createElement('div');
+                fill.className = `indicator-fill ${fillClass}`;
+                fill.style.backgroundColor = color;
+
+                bar.appendChild(fill);
+                wrapper.appendChild(labelElem);
+                wrapper.appendChild(bar);
+                return wrapper;
+            }
+
+            updateUI() {
+                if (!this.element || !this.isSubject) return;
+
+                const pressureFill = this.element.querySelector('.pressure-fill');
+                const anxietyFill = this.element.querySelector('.anxiety-fill');
+
+                if (pressureFill) pressureFill.style.width = `${this.currentPressure}%`;
+                if (anxietyFill) anxietyFill.style.width = `${this.currentAnxiety}%`;
+
+                // Visual feedback on the avatar
+                const avatar = this.element.querySelector('.avatar');
+                if (this.currentAnxiety > 70) {
+                    avatar.style.boxShadow = `0 0 ${this.currentAnxiety/5}px var(--error-color)`;
+                } else {
+                    avatar.style.boxShadow = 'none';
+                }
+            }
+
+            speak(text, duration = 1000) {
+                return new Promise(resolve => {
+                    const bubble = this.element.querySelector('.bubble');
+                    const avatar = this.element.querySelector('.avatar');
+
+                    bubble.textContent = text;
+                    bubble.style.display = 'block';
+                    avatar.classList.add('speaking');
+
+                    setTimeout(() => {
+                        bubble.style.display = 'none';
+                        avatar.classList.remove('speaking');
+                        resolve();
+                    }, duration);
+                });
+            }
+        }
+
+        class Simulation {
+            constructor(containerId, hasAlly = false) {
+                this.containerId = containerId;
+                this.participants = [];
+                this.rounds = 0;
+                this.currentRoundData = null;
+                this.isRunning = false;
+                this.mode = 'observation'; // 'observation' or 'participant'
+                this.speed = 1000;
+
+                // Configurable parameters
+                this.config = {
+                    numParticipants: 7,
+                    majorityBehavior: 'unanimous_error',
+                    hasAlly: hasAlly,
+                    subjectIndex: 6,
+                    isPrivate: false,
+                    environment: 'laboratory'
+                };
+
+                this.stats = {
+                    totalRounds: 0,
+                    conformityCount: 0,
+                    correctCount: 0,
+                    totalPressure: 0
+                };
+            }
+
+            get container() {
+                return document.getElementById(this.containerId);
+            }
+
+            init() {
+                this.generateParticipants();
+                this.renderParticipants();
+                this.updateStatsUI();
+            }
+
+            generateParticipants() {
+                this.participants = [];
+                for (let i = 0; i < this.config.numParticipants; i++) {
+                    const isSubject = (i === this.config.subjectIndex);
+                    this.participants.push(new Participant(i + 1, isSubject));
+                }
+            }
+
+            renderParticipants() {
+                const room = this.container.querySelector('.experimental-room');
+                room.innerHTML = '';
+
+                // Set environment class
+                room.classList.remove('room-laboratory', 'room-chat', 'room-video');
+                room.classList.add(`room-${this.config.environment}`);
+
+                const grid = document.createElement('div');
+                grid.className = 'participants-grid';
+
+                this.participants.forEach(p => {
+                    grid.appendChild(p.render());
+                });
+
+                room.appendChild(grid);
+            }
+
+            generateTrial() {
+                const baseLength = 100 + Math.random() * 50;
+                const correctIndex = Math.floor(Math.random() * 3);
+                const options = [0, 0, 0];
+
+                options[correctIndex] = baseLength;
+
+                // Generate wrong options with significant difference
+                for (let i = 0; i < 3; i++) {
+                    if (i !== correctIndex) {
+                        const diff = (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 30);
+                        options[i] = baseLength + diff;
+                    }
+                }
+
+                this.currentRoundData = {
+                    pattern: baseLength,
+                    options: options,
+                    correctIndex: correctIndex,
+                    correctLetter: ['A', 'B', 'C'][correctIndex],
+                    confederateErrorLetter: ['A', 'B', 'C'][(correctIndex + 1 + Math.floor(Math.random() * 2)) % 3]
+                };
+
+                this.renderLines();
+            }
+
+            renderLines() {
+                const patternContainer = this.container.querySelector('.pattern-line-container');
+                const optionsContainer = this.container.querySelector('.options-line-container');
+
+                patternContainer.innerHTML = '';
+                optionsContainer.innerHTML = '';
+
+                // Pattern line
+                const pLine = document.createElement('div');
+                pLine.className = 'line';
+                pLine.style.height = `${this.currentRoundData.pattern}px`;
+                patternContainer.appendChild(pLine);
+
+                // Options
+                this.currentRoundData.options.forEach((h, i) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'line-wrapper';
+
+                    const line = document.createElement('div');
+                    line.className = 'line';
+                    line.style.height = `${h}px`;
+
+                    const label = document.createElement('span');
+                    label.textContent = ['A', 'B', 'C'][i];
+
+                    wrapper.appendChild(line);
+                    wrapper.appendChild(label);
+                    optionsContainer.appendChild(wrapper);
+                });
+            }
+
+            updateStatsUI() {
+                if (window.statsManager) window.statsManager.update();
+            }
+
+            async startRound() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.generateTrial();
+
+                let incorrectCount = 0;
+                let responseHistory = [];
+
+                for (let i = 0; i < this.participants.length; i++) {
+                    const p = this.participants[i];
+
+                    if (p.isSubject) {
+                        if (this.mode === 'participant') {
+                            await this.handleUserInteraction(incorrectCount);
+                        } else {
+                            await this.handleAISubject(incorrectCount);
+                        }
+                    } else {
+                        const answer = this.getConfederateAnswer(i, incorrectCount);
+                        if (answer !== this.currentRoundData.correctLetter) {
+                            incorrectCount++;
+                        }
+                        responseHistory.push(answer);
+                        await p.speak(answer, this.speed);
+                    }
+                }
+
+                this.rounds++;
+                this.isRunning = false;
+
+                // Wait before next round if in automatic mode
+                if (this.mode === 'observation') {
+                    setTimeout(() => this.startRound(), 2000);
+                }
+            }
+
+            getConfederateAnswer(index, currentErrorsInGroup) {
+                // Determine if this confederate should be an ally
+                if (this.config.hasAlly && index === 0) {
+                    return this.currentRoundData.correctLetter;
+                }
+
+                switch (this.config.majorityBehavior) {
+                    case 'unanimous_error':
+                        return this.currentRoundData.confederateErrorLetter;
+                    case 'unanimous_correct':
+                        return this.currentRoundData.correctLetter;
+                    case 'majority_error':
+                        // 75% error rate
+                        return Math.random() < 0.75 ? this.currentRoundData.confederateErrorLetter : this.currentRoundData.correctLetter;
+                    case 'mixed':
+                        return Math.random() < 0.5 ? this.currentRoundData.confederateErrorLetter : this.currentRoundData.correctLetter;
+                    default:
+                        return this.currentRoundData.correctLetter;
+                }
+            }
+
+            async handleAISubject(incorrectCount) {
+                const subject = this.participants.find(p => p.isSubject);
+                const totalConfederates = this.participants.length - 1;
+
+                // Calculate pressure: proportional to the number of people who gave the same (wrong) answer
+                const pressureLevel = (incorrectCount / totalConfederates) * 100;
+                subject.updateState(pressureLevel);
+
+                // Add some artificial thinking time
+                await new Promise(resolve => setTimeout(resolve, this.speed / 2));
+
+                // Probabilistic decision engine
+                const decision = this.calculateDecision(subject, incorrectCount);
+
+                await subject.speak(decision, this.speed);
+                this.recordResult(decision);
+            }
+
+            calculateDecision(subject, incorrectCount) {
+                if (incorrectCount === 0) return this.currentRoundData.correctLetter;
+
+                // Private response significantly reduces conformity
+                if (this.config.isPrivate) {
+                    // Even in private, there's a tiny bit of doubt or error
+                    return Math.random() < 0.95 ? this.currentRoundData.correctLetter : this.currentRoundData.confederateErrorLetter;
+                }
+
+                // Factors (0-1)
+                let pressureFactor = incorrectCount / (this.participants.length - 1);
+
+                // Virtual environments reduce pressure slightly
+                if (this.config.environment === 'chat') pressureFactor *= 0.7;
+                if (this.config.environment === 'video') pressureFactor *= 0.85;
+
+                const anxietyFactor = subject.currentAnxiety / 100;
+                const independenceFactor = (subject.criticalThinking + subject.selfEsteem) / 200;
+
+                // Probability of conformity
+                // Base probability increases with pressure and anxiety, decreases with independence
+                let conformityProb = (pressureFactor * 0.6) + (anxietyFactor * 0.3) - (independenceFactor * 0.4);
+
+                // Ensure probability is within [0.1, 0.9] range for some realism
+                conformityProb = Math.max(0.05, Math.min(0.95, conformityProb));
+
+                if (Math.random() < conformityProb) {
+                    return this.currentRoundData.confederateErrorLetter;
+                } else {
+                    return this.currentRoundData.correctLetter;
+                }
+            }
+
+            recordResult(answer) {
+                const isCorrect = (answer === this.currentRoundData.correctLetter);
+                const isConformity = (!isCorrect && this.config.majorityBehavior !== 'unanimous_correct');
+
+                this.stats.totalRounds++;
+                if (isCorrect) this.stats.correctCount++;
+                if (isConformity) this.stats.conformityCount++;
+
+                this.updateStatsUI();
+            }
+
+            animate() {
+                const subject = this.participants.find(p => p.isSubject);
+                if (subject && subject.element) {
+                    const avatar = subject.element.querySelector('.avatar');
+                    const time = Date.now() / 1000;
+
+                    // Subtle breathing effect based on anxiety
+                    const breathScale = 1 + Math.sin(time * (1 + subject.currentAnxiety / 50)) * (subject.currentAnxiety / 1000);
+                    avatar.style.transform = `scale(${breathScale})`;
+
+                    // Subtle shaking if anxiety is very high
+                    if (subject.currentAnxiety > 80) {
+                        const shake = (Math.random() - 0.5) * (subject.currentAnxiety - 80) / 10;
+                        avatar.style.marginLeft = `${shake}px`;
+                    } else {
+                        avatar.style.marginLeft = '0px';
+                    }
+                }
+
+                requestAnimationFrame(() => this.animate());
+            }
+
+            async handleUserInteraction(incorrectCount) {
+                const subject = this.participants.find(p => p.isSubject);
+                const totalConfederates = this.participants.length - 1;
+                const pressureLevel = (incorrectCount / totalConfederates) * 100;
+                subject.updateState(pressureLevel);
+
+                const interactionArea = this.container.querySelector('.interaction-area');
+                interactionArea.classList.remove('hidden');
+
+                return new Promise(resolve => {
+                    this.userResolve = (choice) => {
+                        interactionArea.classList.add('hidden');
+                        subject.speak(choice, this.speed);
+                        this.recordResult(choice);
+                        resolve();
+                    };
+                });
+            }
+
+            userSelect(choice) {
+                if (this.userResolve) {
+                    this.userResolve(choice);
+                    this.userResolve = null;
+                }
+            }
+
+            toggleMode() {
+                this.mode = (this.mode === 'observation' ? 'participant' : 'observation');
+                const btn = document.getElementById('btn-mode-toggle');
+                btn.textContent = (this.mode === 'observation' ? 'Cambiar a Modo Participante' : 'Cambiar a Modo Observación');
+
+                // Restart simulation if it's running
+                if (this.isRunning) {
+                    // Logic to reset current round might be complex, let's just let it finish
+                } else if (this.mode === 'observation') {
+                    this.startRound();
+                }
+            }
+        }
+
+        class UIManager {
+            constructor(simulation) {
+                this.sim = simulation;
+                this.isDidacticOpen = false;
+            }
+
+            init() {
+                this.renderControls();
+                this.setupEventListeners();
+                this.sim.animate(); // Start animation loop
+                this.sim.startRound();
+            }
+
+            renderControls() {
+                const panel = document.getElementById('main-controls');
+                panel.innerHTML = `
+                    <div class="control-group">
+                        <label>Participantes: <span class="range-val" id="val-numParticipants">${this.sim.config.numParticipants}</span></label>
+                        <input type="range" min="3" max="12" value="${this.sim.config.numParticipants}" oninput="ui.updateConfig('numParticipants', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label>Comportamiento Mayoría:</label>
+                        <select onchange="ui.updateConfig('majorityBehavior', this.value)" style="width:100%; padding: 5px;">
+                            <option value="unanimous_error">Error Unánime</option>
+                            <option value="unanimous_correct">Acierto Unánime</option>
+                            <option value="majority_error">Mayoría Errónea (75%)</option>
+                            <option value="mixed">Mezclado (50%)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label title="Añade un cómplice que responde correctamente">
+                            <input type="checkbox" onchange="ui.updateConfig('hasAlly', this.checked)"> Presencia de Aliado
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label title="Las respuestas del sujeto no son escuchadas por el grupo">
+                            <input type="checkbox" onchange="ui.updateConfig('isPrivate', this.checked)"> Respuesta Privada
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>Entorno:</label>
+                        <select onchange="ui.updateConfig('environment', this.value)" style="width:100%; padding: 5px;">
+                            <option value="laboratory">Laboratorio Presencial</option>
+                            <option value="chat">Chat Virtual (WhatsApp style)</option>
+                            <option value="video">Videollamada (Zoom style)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Velocidad (ms): <span class="range-val" id="val-speed">${this.sim.speed}</span></label>
+                        <input type="range" min="200" max="3000" step="100" value="${this.sim.speed}" oninput="ui.updateConfig('speed', this.value)">
+                    </div>
+                    <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #eee;">
+                    <h3>Variables del Sujeto</h3>
+                    <div class="control-group">
+                        <label>Autoestima: <span class="range-val" id="val-selfEsteem">50</span></label>
+                        <input type="range" min="0" max="100" value="50" oninput="ui.updateSubjectTrait('selfEsteem', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label>Pensamiento Crítico: <span class="range-val" id="val-criticalThinking">50</span></label>
+                        <input type="range" min="0" max="100" value="50" oninput="ui.updateSubjectTrait('criticalThinking', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label>Ansiedad Social: <span class="range-val" id="val-socialAnxiety">30</span></label>
+                        <input type="range" min="0" max="100" value="30" oninput="ui.updateSubjectTrait('socialAnxiety', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <button class="secondary" onclick="statsManager.reset()" style="width:100%; margin-bottom: 5px;">Reiniciar Estadísticas</button>
+                        <button class="secondary" onclick="location.reload()" style="width:100%">Reiniciar Todo</button>
+                    </div>
+                `;
+            }
+
+            updateConfig(key, value) {
+                const simulations = [this.sim, window.simulation2];
+                simulations.forEach(sim => {
+                    if (!sim) return;
+
+                    if (key === 'speed') {
+                        sim.speed = parseInt(value);
+                    } else if (key === 'numParticipants') {
+                        sim.config[key] = parseInt(value);
+                        sim.config.subjectIndex = sim.config.numParticipants - 1;
+                        sim.init();
+                    } else if (key === 'environment') {
+                        sim.config[key] = value;
+                        sim.renderParticipants();
+                    } else if (key === 'hasAlly' && sim === this.sim) {
+                        sim.config[key] = value;
+                    } else if (key !== 'hasAlly') {
+                        sim.config[key] = value;
+                    }
+                });
+
+                if (document.getElementById(`val-${key}`)) {
+                    document.getElementById(`val-${key}`).textContent = value;
+                }
+            }
+
+            updateSubjectTrait(key, value) {
+                const simulations = [this.sim, window.simulation2];
+                simulations.forEach(sim => {
+                    if (!sim) return;
+                    const subject = sim.participants.find(p => p.isSubject);
+                    if (subject) {
+                        subject[key] = parseInt(value);
+                    }
+                });
+                document.getElementById(`val-${key}`).textContent = value;
+            }
+
+            toggleMode() {
+                this.sim.toggleMode();
+                if (window.simulation2) window.simulation2.toggleMode();
+            }
+
+            toggleComparisonMode() {
+                const layout = document.body;
+                const btn = document.getElementById('btn-comparison-toggle');
+                const sim2Container = document.getElementById('sim-2');
+                const isComparison = layout.classList.toggle('comparison-active');
+
+                if (isComparison) {
+                    btn.textContent = "Modo Comparación: ON";
+                    sim2Container.classList.remove('hidden');
+                    if (!window.simulation2) {
+                        window.simulation2 = new Simulation('sim-2', true);
+                        window.simulation2.init();
+                        window.simulation2.animate();
+                    }
+                    window.simulation2.startRound();
+                } else {
+                    btn.textContent = "Modo Comparación: OFF";
+                    sim2Container.classList.add('hidden');
+                }
+            }
+
+            toggleDidactic() {
+                this.isDidacticOpen = !this.isDidacticOpen;
+                const overlay = document.getElementById('overlay');
+                const didactic = document.getElementById('didactic-content');
+
+                if (this.isDidacticOpen) {
+                    this.renderDidacticContent();
+                    overlay.classList.remove('hidden');
+                    didactic.classList.remove('hidden');
+                } else {
+                    overlay.classList.add('hidden');
+                }
+            }
+
+            renderDidacticContent() {
+                const content = document.getElementById('didactic-content');
+                content.innerHTML = `
+                    <button class="close-btn" onclick="ui.closeOverlays()">Cerrar</button>
+                    <h2 style="color: var(--accent-color); border-bottom: 2px solid #eee; padding-bottom: 10px;">El Experimento de Solomon Asch</h2>
+                    <div style="margin-top: 1.5rem;">
+                        <p><strong>¿Quién fue Solomon Asch?</strong> Fue un psicólogo polaco-estadounidense pionero en la psicología social. En la década de 1950, realizó una serie de experimentos fundamentales para comprender la presión de grupo.</p>
+
+                        <h3 style="margin-top: 1.5rem;">El Experimento Original</h3>
+                        <p>Asch reunía a un grupo de personas (donde todos eran cómplices menos uno) para realizar una supuesta "prueba visual". Se les mostraba una línea patrón y debían decir cuál de otras tres líneas (A, B o C) era idéntica en longitud.</p>
+                        <p>Los cómplices daban respuestas incorrectas de forma unánime en ciertos ensayos clave. El objetivo era ver si el sujeto real se conformaba con la mayoría o mantenía su independencia.</p>
+
+                        <h3 style="margin-top: 1.5rem;">Conceptos Clave</h3>
+                        <ul>
+                            <li><strong>Conformidad Social:</strong> El acto de cambiar el propio comportamiento o pensamiento para encajar con un grupo.</li>
+                            <li><strong>Influencia Normativa:</strong> Conformarse para ser aceptado y evitar el rechazo o el aislamiento social.</li>
+                            <li><strong>Influencia Informativa:</strong> Conformarse porque creemos que la información del grupo es más correcta que la nuestra.</li>
+                            <li><strong>Efecto del Aliado:</strong> Asch descubrió que si solo una persona más del grupo rompía la unanimidad (dando la respuesta correcta), la conformidad del sujeto bajaba drásticamente (del 33% al 5%).</li>
+                        </ul>
+
+                        <h3 style="margin-top: 1.5rem;">Resultados</h3>
+                        <p>Aproximadamente el 75% de los participantes se conformaron al menos una vez. En promedio, los participantes se conformaron con la respuesta incorrecta de la mayoría en el 33% de los ensayos críticos.</p>
+
+                        <h3 style="margin-top: 1.5rem;">Aplicaciones Actuales</h3>
+                        <p>Hoy estos hallazgos nos ayudan a entender fenómenos como las burbujas en redes sociales, la polarización política, el pensamiento grupal en organizaciones y la importancia de la disidencia para una toma de decisiones saludable.</p>
+                    </div>
+                `;
+            }
+
+            closeOverlays() {
+                this.isDidacticOpen = false;
+                document.getElementById('overlay').classList.add('hidden');
+            }
+
+            setupEventListeners() {
+                // Clicking on participants for details
+                document.getElementById('simulations-wrapper').addEventListener('click', (e) => {
+                    const avatar = e.target.closest('.avatar-container');
+                    if (avatar) {
+                        const id = parseInt(avatar.dataset.participantId);
+                        const simContainer = avatar.closest('.simulation-instance');
+                        const sim = (simContainer.id === 'sim-1') ? simulation1 : window.simulation2;
+
+                        if (sim) {
+                            const p = sim.participants.find(part => part.id === id);
+                            alert(`ID: ${p.id}\nRol: ${p.isSubject ? 'Sujeto' : 'Cómplice'}\nAutoestima: ${Math.round(p.selfEsteem)}\nPensamiento Crítico: ${Math.round(p.criticalThinking)}\nAnsiedad: ${Math.round(p.currentAnxiety)}`);
+                        }
+                    }
+                });
+            }
+        }
+
+        class StatsManager {
+            constructor(simulation) {
+                this.sim = simulation;
+                this.conformityHistory = [];
+            }
+
+            init() {
+                this.renderStatsStructure();
+                this.update();
+            }
+
+            drawHistogram() {
+                const canvas = document.getElementById('histogram-chart');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width;
+                const h = canvas.height;
+
+                const s1 = this.sim.stats;
+                const s2 = window.simulation2 ? window.simulation2.stats : null;
+
+                ctx.clearRect(0, 0, w, h);
+
+                const drawBars = (stats, offsetX, labelPrefix) => {
+                    const total = stats.totalRounds || 1;
+                    const correctH = (stats.correctCount / total) * (h - 30);
+                    const conformityH = (stats.conformityCount / total) * (h - 30);
+
+                    const barW = s2 ? 30 : 60;
+
+                    // Correct bar
+                    ctx.fillStyle = 'var(--success-color)';
+                    ctx.fillRect(offsetX, h - correctH, barW, correctH);
+
+                    // Conformity bar
+                    ctx.fillStyle = 'var(--error-color)';
+                    ctx.fillRect(offsetX + barW + 5, h - conformityH, barW, conformityH);
+
+                    // Labels
+                    ctx.fillStyle = '#333';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillText(`${labelPrefix}`, offsetX, h - 5);
+                };
+
+                drawBars(s1, 20, 'Sim A');
+                if (s2) {
+                    drawBars(s2, w / 2 + 10, 'Sim B');
+                }
+            }
+
+            renderStatsStructure() {
+                const panel = document.getElementById('stats-content');
+                panel.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-label">Ensayos Totales</div>
+                        <div class="stat-value" id="stat-rounds">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Tasa de Conformidad</div>
+                        <div class="stat-value" id="stat-conformity">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Tasa de Acierto</div>
+                        <div class="stat-value" id="stat-accuracy">0%</div>
+                    </div>
+                    <canvas id="conformity-chart"></canvas>
+                    <div class="stat-label" style="text-align:center; margin-top:5px;">Evolución de Conformidad</div>
+
+                    <canvas id="histogram-chart" style="height: 100px !important;"></canvas>
+                    <div class="stat-label" style="text-align:center; margin-top:5px;">Distribución de Decisiones</div>
+
+                    <div style="margin-top: 1.5rem; font-size: 0.8rem; background: #eee; padding: 10px; border-radius: 4px;">
+                        <strong>Referencia Asch:</strong><br>
+                        Promedio Conformidad: 33%<br>
+                        Al menos una vez: 75%
+                    </div>
+                `;
+            }
+
+            update() {
+                const s1 = this.sim.stats;
+                const s2 = window.simulation2 ? window.simulation2.stats : null;
+
+                const rounds = s2 ? Math.max(s1.totalRounds, s2.totalRounds) : s1.totalRounds;
+                const conformityRate1 = s1.totalRounds > 0 ? Math.round((s1.conformityCount / s1.totalRounds) * 100) : 0;
+                const accuracyRate1 = s1.totalRounds > 0 ? Math.round((s1.correctCount / s1.totalRounds) * 100) : 0;
+
+                const roundElem = document.getElementById('stat-rounds');
+                const confElem = document.getElementById('stat-conformity');
+                const accElem = document.getElementById('stat-accuracy');
+
+                if (roundElem) roundElem.textContent = rounds;
+
+                if (s2) {
+                    const conformityRate2 = s2.totalRounds > 0 ? Math.round((s2.conformityCount / s2.totalRounds) * 100) : 0;
+                    const accuracyRate2 = s2.totalRounds > 0 ? Math.round((s2.correctCount / s2.totalRounds) * 100) : 0;
+                    if (confElem) confElem.innerHTML = `A: ${conformityRate1}% | B: ${conformityRate2}%`;
+                    if (accElem) accElem.innerHTML = `A: ${accuracyRate1}% | B: ${accuracyRate2}%`;
+                } else {
+                    if (confElem) confElem.textContent = `${conformityRate1}%`;
+                    if (accElem) accElem.textContent = `${accuracyRate1}%`;
+                }
+
+                if (s1.totalRounds > 0 || (s2 && s2.totalRounds > 0)) {
+                    this.conformityHistory.push({
+                        a: conformityRate1,
+                        b: s2 ? (s2.totalRounds > 0 ? Math.round((s2.conformityCount / s2.totalRounds) * 100) : 0) : null
+                    });
+
+                    if (this.conformityHistory.length > 50) this.conformityHistory.shift();
+
+                    this.drawChart();
+                    this.drawHistogram();
+                }
+            }
+
+            reset() {
+                const sims = [this.sim, window.simulation2].filter(s => !!s);
+                sims.forEach(sim => {
+                    sim.stats = { totalRounds: 0, conformityCount: 0, correctCount: 0, totalPressure: 0 };
+                    sim.rounds = 0;
+                });
+                this.conformityHistory = [];
+                this.update();
+            }
+
+            drawChart() {
+                const canvas = document.getElementById('conformity-chart');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width;
+                const h = canvas.height;
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Draw grid
+                ctx.strokeStyle = '#eee';
+                ctx.beginPath();
+                for(let i=0; i<=4; i++) {
+                    const y = h - (i * h / 4);
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                }
+                ctx.stroke();
+
+                // Draw history line
+                if (this.conformityHistory.length < 2) return;
+
+                ctx.strokeStyle = 'var(--accent-color)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                const step = w / (this.conformityHistory.length - 1);
+
+                // Line A
+                ctx.strokeStyle = 'var(--accent-color)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                this.conformityHistory.forEach((val, i) => {
+                    const x = i * step;
+                    const y = h - (val.a * h / 100);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                // Line B
+                const hasB = this.conformityHistory.some(val => val.b !== null);
+                if (hasB) {
+                    ctx.strokeStyle = 'var(--success-color)';
+                    ctx.beginPath();
+                    let started = false;
+                    this.conformityHistory.forEach((val, i) => {
+                        if (val.b === null) return;
+                        const x = i * step;
+                        const y = h - (val.b * h / 100);
+                        if (!started) {
+                            ctx.moveTo(x, y);
+                            started = true;
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    });
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Global instances
+        let simulation1, ui, statsManager;
+
+        window.onload = () => {
+            simulation1 = new Simulation('sim-1', false);
+            statsManager = new StatsManager(simulation1);
+            window.statsManager = statsManager;
+            ui = new UIManager(simulation1);
+            window.ui = ui;
+
+            simulation1.init();
+            statsManager.init();
+            ui.init();
+        };
+    </script>
+</body>
+</html>
