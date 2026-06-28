@@ -3,990 +3,951 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Evolución Urbana Pro (1800 - 2100)</title>
+    <title>Simulador de Evolución Urbana Ultra 3.1</title>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --panel-bg: #161b22;
-            --accent-color: #58a6ff;
-            --secondary-accent: #238636;
-            --danger-color: #da3633;
-            --text-color: #c9d1d9;
-            --ui-text: #ffffff;
-            --border-color: #30363d;
+            --bg-color: #05070a;
+            --panel-bg: #0d1117;
+            --sidebar-bg: #161b22;
+            --accent: #58a6ff;
+            --accent-glow: rgba(88, 166, 255, 0.3);
+            --success: #238636;
+            --warning: #f2cc60;
+            --danger: #da3633;
+            --text: #c9d1d9;
+            --text-dim: #8b949e;
+            --border: #30363d;
+            --card: #21262d;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text);
             overflow: hidden;
         }
 
-        #app-container {
+        #app {
             display: flex;
             width: 100vw;
             height: 100vh;
         }
 
-        #simulation-area {
-            position: relative;
-            flex: 1;
-            height: 100%;
-            background-color: #000;
-            overflow: hidden;
-            display: flex;
-        }
-
-        .canvas-wrapper {
-            flex: 1;
-            height: 100%;
-            position: relative;
-            border-right: 1px solid var(--border-color);
-        }
-
-        .canvas-wrapper.hidden {
-            display: none;
-        }
-
-        .canvas-label {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            z-index: 10;
-            color: var(--accent-color);
-            font-weight: bold;
-            pointer-events: none;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
+        /* --- Sidebar --- */
         #sidebar {
-            width: 320px;
+            width: 360px;
             height: 100%;
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
+            background: var(--sidebar-bg);
+            border-left: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            padding: 20px;
+            padding: 24px;
             box-sizing: border-box;
             z-index: 100;
+            overflow-y: auto;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
         }
 
-        h1 { font-size: 1.2rem; margin: 0 0 20px 0; color: var(--accent-color); text-align: center; }
-        h2 { font-size: 0.9rem; margin: 20px 0 10px 0; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+        h1 { font-size: 1.5rem; margin: 0; color: var(--accent); font-weight: 800; letter-spacing: -0.5px; }
+        .tagline { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
 
-        .stats-panel {
-            background: #0d1117;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .stat-value { font-weight: bold; color: var(--ui-text); }
-
-        .control-group { margin-bottom: 15px; }
-        label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px; }
-        input[type="range"] { width: 100%; height: 6px; background: var(--border-color); border-radius: 3px; outline: none; -webkit-appearance: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent-color); border-radius: 50%; cursor: pointer; }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #21262d;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.2s;
-        }
-
-        button:hover { background: #30363d; border-color: #8b949e; }
-        button.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
-        button.primary { background: var(--secondary-accent); color: white; border-color: var(--secondary-accent); }
-
-        #timeline-container {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60%;
-            background: rgba(22, 27, 34, 0.9);
-            border: 1px solid var(--border-color);
-            border-radius: 50px;
-            padding: 10px 25px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-
-        .playback-btn { width: 40px; height: 40px; min-width: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; margin-right: 15px; margin-bottom: 0; background: var(--accent-color); color: white; }
-
-        #year-display { font-weight: bold; min-width: 60px; text-align: center; color: var(--accent-color); }
-
-        .inspector {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 250px;
-            background: rgba(22, 27, 34, 0.95);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            display: none;
-            z-index: 200;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-
-        .chart-grid {
+        .stat-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
-        .mini-chart {
-            height: 60px;
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            position: relative;
-        }
-
-        .mini-chart-label {
-            position: absolute;
-            top: 2px;
-            left: 4px;
-            font-size: 0.6rem;
-            color: #8b949e;
-        }
-
-        /* Modal for Educational Content */
-        #edu-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
+        .stat-card {
             background: var(--panel-bg);
-            width: 80%;
-            max-width: 800px;
-            max-height: 80vh;
-            border-radius: 12px;
-            padding: 40px;
-            overflow-y: auto;
-            position: relative;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2rem; cursor: pointer; color: #8b949e; }
-        .modal-content h2 { color: var(--accent-color); font-size: 1.5rem; border: none; }
-        .modal-content p { line-height: 1.6; margin-bottom: 20px; }
-        .modal-content ul { padding-left: 20px; }
-        .modal-content li { margin-bottom: 10px; }
+        .stat-label { font-size: 0.65rem; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
+        .stat-value { font-size: 1.1rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
 
-        .particle { pointer-events: none; position: absolute; }
+        section h2 {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 24px 0 12px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+
+        button {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover { background: #30363d; border-color: var(--text-dim); }
+        button.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+        button.primary { background: var(--success); color: #fff; border-color: var(--success); width: 100%; margin-top: 10px; }
+
+        .slider-box { margin-bottom: 16px; }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .slider-header label { font-size: 0.75rem; font-weight: 500; }
+        .slider-val { font-size: 0.75rem; color: var(--accent); font-weight: 700; }
+
+        input[type="range"] {
+            width: 100%; height: 4px; background: var(--border); border-radius: 2px;
+            -webkit-appearance: none; outline: none; margin: 12px 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer;
+        }
+
+        /* --- Main Area --- */
+        #main {
+            flex: 1;
+            position: relative;
+            display: flex;
+            background: #000;
+        }
+
+        .viewport {
+            flex: 1;
+            position: relative;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .viewport.hidden { display: none; }
+
+        .v-label {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(13,17,23,0.8);
+            padding: 6px 12px; border-radius: 4px;
+            font-size: 0.7rem; font-weight: 800; color: var(--accent);
+            border: 1px solid var(--border); z-index: 10;
+            backdrop-filter: blur(8px); pointer-events: none;
+        }
+
+        canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+        /* --- HUD --- */
+        #timeline {
+            position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+            width: 600px; background: rgba(22, 27, 34, 0.9);
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 16px 24px; display: flex; align-items: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6); z-index: 1000;
+            backdrop-filter: blur(12px);
+        }
+
+        .play-btn {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: var(--accent); color: #fff; border: none;
+            font-size: 1.2rem; cursor: pointer; margin-right: 20px;
+        }
+
+        .year-info { min-width: 100px; text-align: center; }
+        .year-info div:first-child { font-size: 1.5rem; font-weight: 900; color: var(--accent); line-height: 1; }
+        .year-info div:last-child { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; margin-top: 2px; }
+
+        #inspector {
+            position: absolute; top: 20px; right: 20px; width: 260px;
+            background: rgba(22, 27, 34, 0.95); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px; display: none; z-index: 200;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+        }
+
+        .insp-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.8rem; }
+        .insp-label { color: var(--text-dim); }
+        .insp-val { font-weight: 600; color: #fff; }
+
+        /* --- Charts --- */
+        .chart-container {
+            height: 80px; background: var(--panel-bg); border: 1px solid var(--border);
+            border-radius: 6px; margin-top: 12px; position: relative; overflow: hidden;
+        }
+        .chart-label { position: absolute; top: 4px; left: 8px; font-size: 0.55rem; color: var(--text-dim); font-weight: 800; z-index: 5; }
+
+        /* --- Modal --- */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; z-index: 2000;
+            align-items: center; justify-content: center; backdrop-filter: blur(4px);
+        }
+        .modal {
+            background: var(--sidebar-bg); width: 90%; max-width: 800px; max-height: 85vh;
+            border-radius: 16px; border: 1px solid var(--border); padding: 40px;
+            overflow-y: auto; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+        .close-modal { position: absolute; top: 24px; right: 24px; font-size: 2rem; color: var(--text-dim); cursor: pointer; }
+        .modal h2 { color: var(--accent); margin-top: 0; }
+        .modal p { line-height: 1.6; color: var(--text); }
+        .modal h3 { font-size: 1.1rem; color: #fff; margin-top: 24px; }
+        .modal ul { padding-left: 20px; }
+        .modal li { margin-bottom: 10px; }
+
+        .neighborhood-tag {
+            position: absolute; font-size: 0.6rem; font-weight: 800;
+            color: rgba(255,255,255,0.3); text-transform: uppercase;
+            letter-spacing: 2px; pointer-events: none; z-index: 5;
+            text-shadow: 0 0 10px rgba(0,0,0,1);
+        }
     </style>
 </head>
 <body>
 
-<div id="app-container">
-    <div id="simulation-area">
-        <div id="canvas-wrapper-A" class="canvas-wrapper">
-            <div class="canvas-label">CIUDAD A: PLANIFICADA</div>
+<div id="app">
+    <div id="main">
+        <div id="viewport-A" class="viewport">
+            <div class="v-label">A: MODELO PLANIFICADO</div>
             <canvas id="canvas-A"></canvas>
+            <div id="labels-A" style="position:absolute; inset:0; pointer-events:none"></div>
         </div>
-        <div id="canvas-wrapper-B" class="canvas-wrapper hidden">
-            <div class="canvas-label">CIUDAD B: ESPONTÁNEA</div>
+        <div id="viewport-B" class="viewport hidden">
+            <div class="v-label">B: CRECIMIENTO ESPONTÁNEO</div>
             <canvas id="canvas-B"></canvas>
+            <div id="labels-B" style="position:absolute; inset:0; pointer-events:none"></div>
         </div>
 
-        <div id="inspector-A" class="inspector">
-            <h3 style="margin:0 0 10px 0; font-size: 1rem; color: var(--accent-color)">Detalles del Lote</h3>
-            <div class="inspector-body" id="inspector-content-A"></div>
-            <button onclick="this.parentElement.style.display='none'" style="margin-top:10px; padding: 5px;">Cerrar</button>
+        <div id="inspector">
+            <div id="insp-title" style="color: var(--accent); font-weight: 800; font-size: 0.9rem; margin-bottom: 12px;">Sector Urbano</div>
+            <div id="insp-content"></div>
+            <button onclick="document.getElementById('inspector').style.display='none'" style="margin-top: 12px; width: 100%; font-size: 0.7rem; padding: 6px;">Cerrar</button>
         </div>
 
-        <div id="timeline-container">
-            <button id="play-pause-btn" class="playback-btn">▶</button>
-            <div id="year-display">1800</div>
-            <input type="range" id="year-slider" min="1800" max="2100" value="1800">
-            <div style="margin-left: 15px; display: flex; align-items: center;">
-                <label style="margin: 0 10px 0 0; font-size: 0.7rem;">Velocidad:</label>
-                <input type="range" id="speed-slider" min="1" max="10" value="3" style="width: 80px;">
+        <div id="timeline">
+            <button id="play-pause" class="play-btn">▶</button>
+            <div class="year-info">
+                <div id="year-val">1800</div>
+                <div>AÑO ACTUAL</div>
+            </div>
+            <div style="flex: 1; margin: 0 32px;">
+                <input type="range" id="year-slider" min="1800" max="2100" value="1800">
+            </div>
+            <div style="width: 120px;">
+                <div class="slider-header"><label>VELOCIDAD</label></div>
+                <input type="range" id="speed-slider" min="1" max="20" value="5">
             </div>
         </div>
     </div>
 
     <div id="sidebar">
-        <h1>Simulador Urbano</h1>
+        <h1>SimCity Pro</h1>
+        <div class="tagline">Scientific Urban Lab v3.1</div>
 
-        <div class="stats-panel">
-            <div class="stat-row"><span>Población:</span> <span id="stat-pop" class="stat-value">0</span></div>
-            <div class="stat-row"><span>Densidad:</span> <span id="stat-dens" class="stat-value">0</span></div>
-            <div class="stat-row"><span>PIB:</span> <span id="stat-gdp" class="stat-value">0</span></div>
-            <div class="stat-row"><span>Contaminación:</span> <span id="stat-poll" class="stat-value">0</span></div>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-label">POBLACIÓN</span>
+                <span id="stat-pop" class="stat-value">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">PIB (USD)</span>
+                <span id="stat-gdp" class="stat-value">$0M</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">DENSIDAD</span>
+                <span id="stat-dens" class="stat-value">0.0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">POLUCIÓN</span>
+                <span id="stat-poll" class="stat-value">0%</span>
+            </div>
         </div>
 
-        <h2>Capas</h2>
-        <div class="control-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-            <button class="layer-btn active" data-layer="normal">Normal</button>
-            <button class="layer-btn" data-layer="density">Densidad</button>
-            <button class="layer-btn" data-layer="value">Valor</button>
-            <button class="layer-btn" data-layer="pollution">Humo</button>
-            <button class="layer-btn" data-layer="traffic">Tráfico</button>
-            <button class="layer-btn" data-layer="income">Renta</button>
-        </div>
+        <section>
+            <h2>Capas de Datos</h2>
+            <div class="btn-group">
+                <button class="layer-btn active" data-layer="normal">Normal</button>
+                <button class="layer-btn" data-layer="density">Densidad</button>
+                <button class="layer-btn" data-layer="value">Valor Suelo</button>
+                <button class="layer-btn" data-layer="pollution">Contaminación</button>
+                <button class="layer-btn" data-layer="traffic">Tráfico</button>
+                <button class="layer-btn" data-layer="income">Renta</button>
+            </div>
+        </section>
 
-        <h2>Políticas y Entorno</h2>
-        <div class="control-group">
-            <label><span>Natalidad</span> <span id="val-birth">50%</span></label>
-            <input type="range" id="param-birth" min="0" max="100" value="50">
+        <section>
+            <h2>Simulación Dinámica</h2>
+            <div class="slider-box">
+                <div class="slider-header"><label>Tasa de Inmigración</label><span id="val-mig" class="slider-val">30%</span></div>
+                <input type="range" id="sl-mig" min="0" max="100" value="30">
+            </div>
+            <div class="slider-box">
+                <div class="slider-header"><label>Inversión Pública</label><span id="val-inv" class="slider-val">20%</span></div>
+                <input type="range" id="sl-inv" min="0" max="100" value="20">
+            </div>
+            <div class="slider-box">
+                <div class="slider-header"><label>Zonas Verdes</label><span id="val-gre" class="slider-val">40%</span></div>
+                <input type="range" id="sl-gre" min="0" max="100" value="40">
+            </div>
+        </section>
 
-            <label><span>Migración</span> <span id="val-migration">30%</span></label>
-            <input type="range" id="param-migration" min="0" max="100" value="30">
+        <section>
+            <h2>Eventos Históricos</h2>
+            <div class="btn-group">
+                <button id="evt-rail">Ferrocarril</button>
+                <button id="evt-indus">Industria</button>
+                <button id="evt-boom">Boom Inmo</button>
+                <button id="evt-crisis">Crisis</button>
+            </div>
+        </section>
 
-            <label><span>Inversión Pública</span> <span id="val-public">20%</span></label>
-            <input type="range" id="param-public" min="0" max="100" value="20">
+        <section>
+            <h2>Métricas en Tiempo Real</h2>
+            <div class="chart-container" id="ch-pop"><div class="chart-label">CRECIMIENTO POBLACIONAL</div></div>
+            <div class="chart-container" id="ch-gdp"><div class="chart-label">DESARROLLO ECONÓMICO</div></div>
+            <div class="chart-container" id="ch-poll"><div class="chart-label">EMISIONES CO2</div></div>
+        </section>
 
-            <label><span>Zonas Verdes</span> <span id="val-green">40%</span></label>
-            <input type="range" id="param-green" min="0" max="100" value="40">
-        </div>
-
-        <h2>Eventos</h2>
-        <div class="control-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-            <button id="evt-rail">Ferrocarril</button>
-            <button id="evt-indus">Indus. Rev</button>
-            <button id="evt-boom">Boom Inmo.</button>
-            <button id="evt-crisis">Crisis Ec.</button>
-        </div>
-
-        <h2>Métricas</h2>
-        <div class="chart-grid">
-            <div class="mini-chart" id="chart-pop"><div class="mini-chart-label">POBLACIÓN</div></div>
-            <div class="mini-chart" id="chart-gdp"><div class="mini-chart-label">ECONOMÍA</div></div>
-            <div class="mini-chart" id="chart-poll"><div class="mini-chart-label">POLUCIÓN</div></div>
-            <div class="mini-chart" id="chart-value"><div class="mini-chart-label">SUELO</div></div>
-        </div>
-
-        <div style="margin-top: auto; padding-top: 20px;">
-            <button id="btn-compare" class="primary">Modo Comparación</button>
-            <button id="btn-edu">Explicar Urbanismo</button>
+        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+            <button id="btn-compare">Modo Comparación</button>
+            <button id="btn-export">Exportar Estadísticas (.CSV)</button>
+            <button id="btn-edu" class="primary">Explicar Urbanismo</button>
         </div>
     </div>
 </div>
 
-<div id="edu-modal">
-    <div class="modal-content">
+<div id="modal-overlay">
+    <div class="modal">
         <span class="close-modal">&times;</span>
-        <h2>¿Cómo evolucionan las ciudades?</h2>
-        <div id="edu-text">
-            <!-- Content will be injected here -->
-        </div>
+        <div id="modal-content"></div>
     </div>
 </div>
 
 <script>
 /**
- * URBAN EVOLUTION SIMULATION 2.0
- *
- * Modular components:
- * 1. Cell & World (Data Layer)
- * 2. City Simulator (Logic Layer)
- * 3. Renderer (Visual Layer)
- * 4. Application State (Controller)
+ * URBAN LAB ENGINE 3.1
+ * Optimization Focus: Pre-calculation of static colors, throttled UI updates.
  */
 
-const WORLD_WIDTH = 100;
-const WORLD_HEIGHT = 60;
-const CELL_SIZE = 8; // Variable depending on canvas size
+const GRID_W = 100;
+const GRID_H = 60;
 
-// --- 1. DATA LAYER ---
+// --- UTILS ---
+const hexToRgb = hex => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return [r, g, b];
+};
 
+const lerpColor = (c1, c2, f) => {
+    return c1.map((v, i) => Math.round(v + f * (c2[i] - v)));
+};
+
+const rgbToString = (rgb, a=1) => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
+
+// --- NOISE ---
+const Noise = (() => {
+    const p = new Uint8Array(512);
+    const perm = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+    190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+    77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+    135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+    223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+    251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+    138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+    for (let i=0; i<256; i++) p[256+i] = p[i] = perm[i];
+    const fade = t => t * t * t * (t * (t * 6 - 15) + 10);
+    const lerp = (t, a, b) => a + t * (b - a);
+    const grad = (hash, x, y) => {
+        const h = hash & 15;
+        const u = h < 8 ? x : y;
+        const v = h < 4 ? y : h === 12 || h === 14 ? x : 0;
+        return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+    };
+    return (x, y) => {
+        const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+        x -= Math.floor(x); y -= Math.floor(y);
+        const u = fade(x), v = fade(y);
+        const A = p[X]+Y, AA = p[A], AB = p[A+1], B = p[X+1]+Y, BA = p[B], BB = p[B+1];
+        return lerp(v, lerp(u, grad(p[AA], x, y), grad(p[BA], x-1, y)),
+                       lerp(u, grad(p[AB], x, y-1), grad(p[BB], x-1, y-1)));
+    };
+})();
+
+// --- SIMULATION DATA ---
 class Cell {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.type = 'empty'; // empty, water, hill, forest
-        this.infrastructure = null; // road, rail, park
-        this.infraLevel = 0; // 0: path, 1: street, 2: avenue, 3: highway
-
+    constructor(x, y, elevation) {
+        this.x = x; this.y = y;
+        this.elevation = elevation;
+        this.type = 'grass';
         this.buildingType = null; // res, com, ind, pub
-        this.buildingLevel = 0; // 0-5
-        this.age = 0;
-
+        this.buildingLevel = 0;
         this.population = 0;
-        this.landValue = 100;
+        this.income = 1; // 1-3
+        this.infrastructure = null; // road
+        this.infraLevel = 0;
         this.pollution = 0;
+        this.landValue = 100;
         this.accessibility = 0;
-        this.income = 1; // 1: low, 2: mid, 3: high
-        this.traffic = 0;
-        this.noise = 0;
+        this.districtId = -1;
+
+        // Visual cache
+        this.terrainColor = '#1a1d1a';
+    }
+
+    setTerrain() {
+        if (this.elevation < 0.25) { this.type = 'water'; this.terrainColor = '#1e3a8a'; }
+        else if (this.elevation < 0.3) { this.type = 'sand'; this.terrainColor = '#c2b280'; }
+        else if (this.elevation > 0.8) { this.type = 'mountain'; this.terrainColor = '#404040'; }
+        else if (this.elevation > 0.6) { this.type = 'hill'; this.terrainColor = '#2d332d'; }
+        else {
+            const forest = Noise(this.x * 0.1, this.y * 0.1);
+            if (forest > 0.4) { this.type = 'forest'; this.terrainColor = '#064e3b'; }
+            else { this.type = 'grass'; this.terrainColor = '#1a1d1a'; }
+        }
+        // Apply shaded look
+        const rgb = hexToRgb(this.terrainColor);
+        const shade = (this.elevation - 0.5) * 60;
+        this.terrainColor = rgbToString(rgb.map(c => Math.max(0, Math.min(255, c + shade))));
     }
 }
 
-// --- 2. LOGIC LAYER ---
-
-class CitySimulator {
+class City {
     constructor(mode = 'planned') {
         this.mode = mode;
         this.grid = [];
         this.year = 1800;
-        this.stats = {
-            population: 0,
-            gdp: 0,
-            pollution: 0,
-            avgLandValue: 0,
-            expansion: 0,
-            employment: 0
-        };
-        this.history = {
-            pop: [], gdp: [], poll: [], value: [], exp: [], emp: []
-        };
-
-        this.params = {
-            birthRate: 0.02,
-            migrationRate: 0.03,
-            publicInvest: 0.2,
-            greenSpace: 0.4
-        };
-
+        this.neighborhoods = [];
+        this.stats = { pop: 0, gdp: 0, poll: 0, density: 0, value: 0 };
+        this.history = { pop: [], gdp: [], poll: [], value: [] };
+        this.params = { migration: 0.3, invest: 0.2, green: 0.4 };
+        this.events = { rail: false, indus: false, boom: false, crisis: false };
         this.init();
     }
 
     init() {
-        for (let y = 0; y < WORLD_HEIGHT; y++) {
+        const seed = Math.random() * 1000;
+        for (let y=0; y<GRID_H; y++) {
             this.grid[y] = [];
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                this.grid[y][x] = new Cell(x, y);
+            for (let x=0; x<GRID_W; x++) {
+                const e = (Noise(x * 0.05 + seed, y * 0.05 + seed) + 1) * 0.5;
+                const cell = new Cell(x, y, e);
+                cell.setTerrain();
+                this.grid[y][x] = cell;
             }
         }
-        this.generateTerrain();
-        this.seedInitialVillages();
+        this.createRiver();
+        this.seedInitialSettlement();
+        this.defineDistricts();
     }
 
-    generateTerrain() {
-        // Simple procedural river
-        let ry = WORLD_HEIGHT / 2 + (Math.random() - 0.5) * 10;
-        for (let x = 0; x < WORLD_WIDTH; x++) {
-            const cell = this.getCell(x, Math.floor(ry));
-            if (cell) cell.type = 'water';
-            const cellB = this.getCell(x, Math.floor(ry) + 1);
-            if (cellB) cellB.type = 'water';
-            ry += (Math.random() - 0.5) * 1.5;
+    createRiver() {
+        let x = 0, y = Math.floor(GRID_H * 0.4 + Math.random() * 20);
+        while(x < GRID_W) {
+            for(let dy=-1; dy<=2; dy++) {
+                const c = this.getCell(x, y+dy);
+                if(c) { c.type = 'water'; c.terrainColor = '#1e3a8a'; c.elevation = 0.1; }
+            }
+            x++;
+            y += Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+            y = Math.max(5, Math.min(GRID_H-6, y));
         }
+    }
 
-        // Hill clusters
-        for(let i=0; i<3; i++) {
-            let hx = Math.random() * WORLD_WIDTH;
-            let hy = Math.random() * WORLD_HEIGHT;
-            let hr = 5 + Math.random() * 8;
-            for(let y=0; y<WORLD_HEIGHT; y++) {
-                for(let x=0; x<WORLD_WIDTH; x++) {
-                    let d = Math.sqrt((x-hx)**2 + (y-hy)**2);
-                    if (d < hr && Math.random() < 0.7) {
-                        let c = this.getCell(x, y);
-                        if (c && c.type === 'empty') c.type = 'hill';
-                    }
+    seedInitialSettlement() {
+        const cx = Math.floor(GRID_W/2), cy = Math.floor(GRID_H/2);
+        for(let dy=-2; dy<=2; dy++) {
+            for(let dx=-2; dx<=2; dx++) {
+                const c = this.getCell(cx+dx, cy+dy);
+                if(c && c.type !== 'water') {
+                    c.buildingType = 'res';
+                    c.buildingLevel = 1;
+                    c.population = 50;
+                    c.infrastructure = 'road';
                 }
             }
         }
     }
 
-    seedInitialVillages() {
-        // Start with 2 small hubs
-        const hubs = this.mode === 'planned' ? 1 : 3;
-        for(let i=0; i<hubs; i++) {
-            let x = 20 + Math.random() * (WORLD_WIDTH - 40);
-            let y = 20 + Math.random() * (WORLD_HEIGHT - 40);
-            this.developZone(Math.floor(x), Math.floor(y), 'res', 1);
-            this.grid[Math.floor(y)][Math.floor(x)].infrastructure = 'road';
-            this.grid[Math.floor(y)][Math.floor(x)].infraLevel = 1;
+    defineDistricts() {
+        const names = ["Centro", "Ribera", "Norte", "Sur", "Oeste", "Este", "Parque", "Industrial"];
+        for(let i=0; i<6; i++) {
+            this.neighborhoods.push({
+                name: names[i],
+                x: Math.random() * GRID_W,
+                y: Math.random() * GRID_H
+            });
+        }
+        for(let y=0; y<GRID_H; y++) {
+            for(let x=0; x<GRID_W; x++) {
+                let dMin = 9999, id = -1;
+                this.neighborhoods.forEach((n, idx) => {
+                    const d = (x-n.x)**2 + (y-n.y)**2;
+                    if(d < dMin) { dMin = d; id = idx; }
+                });
+                this.grid[y][x].districtId = id;
+            }
         }
     }
 
     getCell(x, y) {
-        if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT) return this.grid[y][x];
+        if(x>=0 && x<GRID_W && y>=0 && y<GRID_H) return this.grid[y][x];
         return null;
     }
 
     update(dt) {
+        const prevYear = Math.floor(this.year);
         this.year += dt;
-        const currentYear = Math.floor(this.year);
+        const curYear = Math.floor(this.year);
 
-        this.calculateAccessibility();
-        this.simulateGrowth();
-        this.simulateDecay();
-        this.simulatePollution();
-        this.calculateStats();
+        this.updateEconomicLayers();
+        this.simulationStep(dt);
 
-        // Update history every year
-        if (this.history.pop.length < (currentYear - 1800 + 1)) {
-            this.history.pop.push(this.stats.population);
-            this.history.gdp.push(this.stats.gdp);
-            this.history.poll.push(this.stats.pollution);
-            this.history.value.push(this.stats.avgLandValue);
-            this.history.exp.push(this.stats.expansion);
-            this.history.emp.push(this.stats.employment);
+        if (curYear > prevYear) {
+            this.calculateStats();
+            this.pushHistory();
         }
     }
 
-    calculateAccessibility() {
-        // Roads increase accessibility
-        for (let y = 0; y < WORLD_HEIGHT; y++) {
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                const cell = this.grid[y][x];
+    updateEconomicLayers() {
+        for (let y=0; y<GRID_H; y++) {
+            for (let x=0; x<GRID_W; x++) {
+                const c = this.grid[y][x];
                 let acc = 0;
+                if(c.infrastructure === 'road') acc += (c.infraLevel + 1) * 25;
 
-                // Centrality
-                const dc = Math.sqrt((x - WORLD_WIDTH/2)**2 + (y - WORLD_HEIGHT/2)**2);
-                acc += Math.max(0, 50 - dc);
-
-                // Near infrastructure
+                // Neighborhood effect
                 const neighbors = this.getNeighbors(x, y, 2);
                 neighbors.forEach(n => {
                     if (n.infrastructure === 'road') acc += (n.infraLevel + 1) * 10;
-                    if (n.infrastructure === 'rail') acc += 50;
+                    if (n.buildingType === 'com') acc += 20;
                 });
 
-                cell.accessibility = acc;
+                const distToCenter = Math.sqrt((x-GRID_W/2)**2 + (y-GRID_H/2)**2);
+                acc += Math.max(0, 50 - distToCenter);
+
+                c.accessibility = acc;
+                c.landValue = 100 + acc * 2 - c.pollution * 1.5;
             }
         }
     }
 
-    simulateGrowth() {
-        // 1. Natural Population Growth & Migration
-        const growth = 1 + this.params.birthRate + this.params.migrationRate;
+    simulationStep(dt) {
+        const gRate = (1 + this.params.migration * 0.1) * (this.events.boom ? 1.5 : 1) * (this.events.crisis ? 0.6 : 1);
+        for (let y=0; y<GRID_H; y++) {
+            for (let x=0; x<GRID_W; x++) {
+                const c = this.grid[y][x];
 
-        // 2. Expansion Logic
-        for (let y = 0; y < WORLD_HEIGHT; y++) {
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                const cell = this.grid[y][x];
-
-                if (cell.buildingType === 'res') {
-                    cell.population *= growth;
-
-                    // Densify if successful
-                    if (cell.population > 100 * cell.buildingLevel && cell.buildingLevel < 5 && Math.random() < 0.1) {
-                        cell.buildingLevel++;
+                if (c.buildingType === 'res') {
+                    c.population *= (1 + 0.005 * gRate);
+                    // Densify
+                    if (c.population > 100 * c.buildingLevel && c.buildingLevel < 10) {
+                        if (c.landValue > 200 || Math.random() < 0.1) c.buildingLevel++;
                     }
+                    // Gentrify
+                    if (c.landValue > 500 && c.income < 3 && Math.random() < 0.01) c.income = 3;
+                    else if (c.landValue > 300 && c.income < 2 && Math.random() < 0.01) c.income = 2;
 
-                    // Spread to neighbors
-                    if (cell.population > 200 && Math.random() < 0.05) {
-                        this.trySpread(x, y);
-                    }
+                    // Expand
+                    if (c.population > 300 && Math.random() < 0.02 * gRate) this.expand(x, y);
                 }
 
-                // Spontaneous road growth if 'espontánea'
-                if (this.mode === 'spontaneous' && cell.buildingType && !cell.infrastructure && Math.random() < 0.05) {
-                    cell.infrastructure = 'road';
-                    cell.infraLevel = 0;
+                // Auto-roads in Mode B
+                if (this.mode === 'spontaneous' && c.buildingType && !c.infrastructure && Math.random() < 0.05) {
+                    c.infrastructure = 'road';
                 }
 
-                // Road Evolution
-                if (cell.infrastructure === 'road') {
-                    this.upgradeRoad(cell);
+                // Pollution
+                if (c.buildingType === 'ind') {
+                    c.pollution = Math.min(100, c.pollution + 2);
+                    this.getNeighbors(x, y, 2).forEach(n => n.pollution += 0.5);
                 }
-            }
-        }
-    }
+                c.pollution *= 0.98;
 
-    upgradeRoad(cell) {
-        // Upgrade road based on surrounding density and year
-        const neighbors = this.getNeighbors(cell.x, cell.y, 2);
-        const popNearby = neighbors.reduce((acc, n) => acc + n.population, 0);
-
-        if (cell.infraLevel < 1 && popNearby > 500) cell.infraLevel = 1; // Street
-        if (cell.infraLevel < 2 && popNearby > 2000 && this.year > 1900) cell.infraLevel = 2; // Avenue
-        if (cell.infraLevel < 3 && popNearby > 5000 && this.year > 1950) cell.infraLevel = 3; // Highway
-    }
-
-    trySpread(x, y) {
-        const neighbors = this.getNeighbors(x, y, 1);
-        const candidates = neighbors.filter(n => n.type !== 'water' && !n.buildingType);
-        if (candidates.length > 0) {
-            const target = candidates[Math.floor(Math.random() * candidates.length)];
-            const type = Math.random() < 0.7 ? 'res' : (Math.random() < 0.8 ? 'com' : 'ind');
-            this.developZone(target.x, target.y, type, 1);
-
-            // Connect road
-            if (Math.random() < 0.8) {
-                target.infrastructure = 'road';
-                target.infraLevel = 0;
-            }
-        }
-    }
-
-    developZone(x, y, type, level) {
-        const cell = this.getCell(x, y);
-        if (!cell) return;
-        cell.buildingType = type;
-        cell.buildingLevel = level;
-        if (type === 'res') cell.population = 20;
-    }
-
-    simulateDecay() {
-        for (let y = 0; y < WORLD_HEIGHT; y++) {
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                const cell = this.grid[y][x];
-                if (!cell.buildingType) continue;
-
-                // Pollution and overcrowding decay
-                if (cell.pollution > 80 && Math.random() < 0.01) {
-                    cell.population *= 0.9;
-                }
-
-                // Gentrification
-                if (cell.buildingType === 'res' && cell.landValue > 400 && cell.income < 3 && Math.random() < 0.01) {
-                    cell.income++;
-                    cell.population *= 0.7; // Richer = lower density
+                // Infra upgrade
+                if (c.infrastructure === 'road') {
+                    const nearbyPop = this.getNeighbors(x, y, 2).reduce((a, b) => a + b.population, 0);
+                    if (nearbyPop > 1500 && c.infraLevel < 2) c.infraLevel++;
                 }
             }
         }
     }
 
-    simulatePollution() {
-        for (let y = 0; y < WORLD_HEIGHT; y++) {
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                const cell = this.grid[y][x];
-                if (cell.buildingType === 'ind') {
-                    cell.pollution += 5;
-                    // Spread pollution
-                    this.getNeighbors(x, y, 2).forEach(n => n.pollution += 1);
-                }
-                cell.pollution *= 0.95; // Natural dissipation
-            }
+    expand(x, y) {
+        const targets = this.getNeighbors(x, y, 1).filter(n => !n.buildingType && n.type !== 'water' && n.type !== 'mountain');
+        if (targets.length > 0) {
+            const t = targets[Math.floor(Math.random() * targets.length)];
+            const r = Math.random();
+            if (r < 0.7) { t.buildingType = 'res'; t.population = 50; }
+            else if (r < 0.9) { t.buildingType = 'com'; }
+            else { t.buildingType = 'ind'; }
+            t.buildingLevel = 1;
+            if (this.mode === 'planned' || Math.random() < 0.5) t.infrastructure = 'road';
         }
-    }
-
-    calculateStats() {
-        let p = 0, val = 0, poll = 0, bld = 0, emp = 0;
-        for (let y = 0; y < WORLD_HEIGHT; y++) {
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                const cell = this.grid[y][x];
-                p += cell.population;
-                poll += cell.pollution;
-                val += cell.landValue + cell.accessibility;
-                if (cell.buildingType) {
-                    bld++;
-                    if (cell.buildingType === 'ind' || cell.buildingType === 'com') emp += cell.buildingLevel * 50;
-                }
-            }
-        }
-        this.stats.population = Math.floor(p);
-        this.stats.pollution = Math.floor(poll / 100);
-        this.stats.gdp = Math.floor(p * 1.5 * (1 + this.stats.pollution/1000));
-        this.stats.avgLandValue = Math.floor(val / (WORLD_WIDTH * WORLD_HEIGHT));
-        this.stats.density = bld > 0 ? (p / bld).toFixed(1) : 0;
-        this.stats.expansion = bld;
-        this.stats.employment = emp;
     }
 
     getNeighbors(x, y, r=1) {
-        let n = [];
+        const n = [];
         for(let dy=-r; dy<=r; dy++) {
             for(let dx=-r; dx<=r; dx++) {
                 if(dx===0 && dy===0) continue;
-                let c = this.getCell(x+dx, y+dy);
+                const c = this.getCell(x+dx, y+dy);
                 if(c) n.push(c);
             }
         }
         return n;
     }
+
+    calculateStats() {
+        let p=0, v=0, pol=0, b=0, g=0;
+        for (let y=0; y<GRID_H; y++) {
+            for (let x=0; x<GRID_W; x++) {
+                const c = this.grid[y][x];
+                p += c.population; v += c.landValue; pol += c.pollution;
+                if(c.buildingType) {
+                    b++;
+                    g += c.buildingLevel * (c.buildingType === 'res' ? 10 : 30);
+                }
+            }
+        }
+        this.stats.pop = Math.floor(p);
+        this.stats.value = Math.floor(v / (GRID_W * GRID_H));
+        this.stats.poll = Math.floor(pol / 100);
+        this.stats.density = b > 0 ? (p / b).toFixed(1) : 0;
+        this.stats.gdp = Math.floor(g * (1 + this.stats.value / 1000));
+    }
+
+    pushHistory() {
+        this.history.pop.push(this.stats.pop);
+        this.history.gdp.push(this.stats.gdp);
+        this.history.poll.push(this.stats.poll);
+        this.history.value.push(this.stats.value);
+        if(this.history.pop.length > 300) {
+            this.history.pop.shift(); this.history.gdp.shift();
+            this.history.poll.shift(); this.history.value.shift();
+        }
+    }
 }
 
-// --- 3. VISUAL LAYER ---
-
-class CityRenderer {
-    constructor(canvas, city) {
+// --- VISUAL ENGINE ---
+class Renderer {
+    constructor(canvas, city, labelContainer) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext('2d', { alpha: false });
         this.city = city;
-        this.viewMode = 'normal';
+        this.labelContainer = labelContainer;
+        this.layer = 'normal';
         this.resize();
-        window.addEventListener('resize', () => this.resize());
     }
 
     resize() {
-        this.canvas.width = this.canvas.parentElement.clientWidth;
-        this.canvas.height = this.canvas.parentElement.clientHeight;
-        this.cellSizeX = this.canvas.width / WORLD_WIDTH;
-        this.cellSizeY = this.canvas.height / WORLD_HEIGHT;
+        const rect = this.canvas.parentElement.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+        this.cw = this.canvas.width / GRID_W;
+        this.ch = this.canvas.height / GRID_H;
+        this.drawLabels();
     }
 
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    drawLabels() {
+        this.labelContainer.innerHTML = '';
+        this.city.neighborhoods.forEach(n => {
+            const div = document.createElement('div');
+            div.className = 'neighborhood-tag';
+            div.innerText = n.name;
+            div.style.left = (n.x * this.cw) + 'px';
+            div.style.top = (n.y * this.ch) + 'px';
+            this.labelContainer.appendChild(div);
+        });
+    }
 
-        for (let y = 0; y < WORLD_HEIGHT; y++) {
-            for (let x = 0; x < WORLD_WIDTH; x++) {
-                this.drawCell(this.city.grid[y][x], x, y);
+    render() {
+        // Main Grid
+        for (let y=0; y<GRID_H; y++) {
+            for (let x=0; x<GRID_W; x++) {
+                this.drawCell(this.city.grid[y][x], x * this.cw, y * this.ch);
             }
         }
-
-        // Draw migration particles
-        this.drawParticles();
     }
 
-    drawParticles() {
-        if (isPaused) return;
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        for (let i = particles.length - 1; i >= 0; i--) {
-            const p = particles[i];
-            if (p.cityId !== (this.canvas.id === 'canvas-A' ? 'A' : 'B')) continue;
+    drawCell(c, x, y) {
+        if (this.layer === 'normal') {
+            this.ctx.fillStyle = c.terrainColor;
+            this.ctx.fillRect(x, y, this.cw + 0.5, this.ch + 0.5);
 
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life -= 0.02;
-
-            if (p.life <= 0) {
-                particles.splice(i, 1);
-                continue;
+            // Infrastructure
+            if (c.infrastructure) {
+                this.ctx.fillStyle = '#334155';
+                const thick = this.cw * (0.2 + c.infraLevel * 0.1);
+                this.ctx.fillRect(x + this.cw*0.5 - thick*0.5, y, thick, this.ch);
+                this.ctx.fillRect(x, y + this.ch*0.5 - thick*0.5, this.cw, thick);
             }
 
-            this.ctx.beginPath();
-            this.ctx.arc(p.x * this.cellSizeX, p.y * this.cellSizeY, 2, 0, Math.PI * 2);
-            this.ctx.fill();
-        }
-    }
+            // Building
+            if (c.buildingType) {
+                let color = '#64748b'; // ind
+                if (c.buildingType === 'res') {
+                    color = c.income === 3 ? '#facc15' : (c.income === 2 ? '#f97316' : '#ef4444');
+                } else if (c.buildingType === 'com') color = '#3b82f6';
+                else if (c.buildingType === 'pub') color = '#a855f7';
 
-    drawCell(cell, x, y) {
-        const px = x * this.cellSizeX;
-        const py = y * this.cellSizeY;
-        const w = this.cellSizeX;
-        const h = this.cellSizeY;
+                const h = c.buildingLevel * (this.ch * 0.4);
+                const w = this.cw * 0.8;
+                const h_rect = this.ch * 0.8;
 
-        if (this.viewMode === 'normal') {
-            this.drawNormal(cell, px, py, w, h);
+                // Shadow
+                this.ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                this.ctx.fillRect(x + this.cw*0.1 + 2, y + this.ch*0.1 + 2, w, h_rect);
+
+                // Body
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(x + this.cw*0.1, y + this.ch*0.1 - h, w, h_rect + h);
+
+                // Roof Highlight
+                this.ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                this.ctx.fillRect(x + this.cw*0.1, y + this.ch*0.1 - h, w, h_rect * 0.2);
+            }
         } else {
-            this.drawHeatmap(cell, px, py, w, h);
-        }
-    }
-
-    drawNormal(cell, px, py, w, h) {
-        // Base Terrain
-        if (cell.type === 'water') this.ctx.fillStyle = '#0077be';
-        else if (cell.type === 'hill') this.ctx.fillStyle = '#3d3d3d';
-        else this.ctx.fillStyle = '#1a1a1a';
-        this.ctx.fillRect(px, py, w, h);
-
-        // Infrastructure
-        if (cell.infrastructure === 'road') {
-            if (cell.infraLevel === 0) { // Path
-                this.ctx.fillStyle = '#5d4037';
-                this.ctx.fillRect(px + w*0.4, py, w*0.2, h);
-                this.ctx.fillRect(px, py + h*0.4, w, h*0.2);
-            } else if (cell.infraLevel === 1) { // Street
-                this.ctx.fillStyle = '#444';
-                this.ctx.fillRect(px + w*0.3, py, w*0.4, h);
-                this.ctx.fillRect(px, py + h*0.3, w, h*0.4);
-            } else if (cell.infraLevel === 2) { // Avenue
-                this.ctx.fillStyle = '#333';
-                this.ctx.fillRect(px + w*0.2, py, w*0.6, h);
-                this.ctx.fillRect(px, py + h*0.2, w, h*0.6);
-                // Center line
-                this.ctx.fillStyle = '#f1c40f';
-                this.ctx.fillRect(px + w*0.45, py, w*0.1, h);
-            } else if (cell.infraLevel === 3) { // Highway
-                this.ctx.fillStyle = '#222';
-                this.ctx.fillRect(px, py, w, h);
-                // Side lines
-                this.ctx.fillStyle = '#fff';
-                this.ctx.fillRect(px, py, w*0.05, h);
-                this.ctx.fillRect(px + w*0.95, py, w*0.05, h);
+            // Heatmap
+            let v = 0, rgb = [0,0,0];
+            switch(this.layer) {
+                case 'density': v = c.population / 1000; rgb = [239, 68, 68]; break;
+                case 'value': v = c.landValue / 1500; rgb = [250, 204, 21]; break;
+                case 'pollution': v = c.pollution / 100; rgb = [148, 163, 184]; break;
+                case 'traffic': v = c.infraLevel / 2; rgb = [249, 115, 22]; break;
+                case 'income': v = c.income / 3; rgb = [168, 85, 247]; break;
             }
+            this.ctx.fillStyle = rgbToString(rgb, Math.max(0.05, Math.min(1, v)));
+            this.ctx.fillRect(x, y, this.cw, this.ch);
         }
-
-        // Buildings
-        if (cell.buildingType) {
-            this.ctx.fillStyle = this.getBuildingColor(cell);
-            const bSize = (cell.buildingLevel / 5) * 0.8 + 0.2;
-            const bw = w * bSize;
-            const bh = h * bSize;
-            this.ctx.fillRect(px + (w-bw)/2, py + (h-bh)/2, bw, bh);
-
-            // Height shading
-            if (cell.buildingLevel > 3) {
-                this.ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-                this.ctx.strokeRect(px + (w-bw)/2, py + (h-bh)/2, bw, bh);
-            }
-        }
-    }
-
-    getBuildingColor(cell) {
-        if (cell.buildingType === 'res') {
-            if (cell.income === 3) return '#f1c40f'; // Gold/Rich
-            if (cell.income === 2) return '#e67e22'; // Orange/Mid
-            return '#e74c3c'; // Red/Low
-        }
-        if (cell.buildingType === 'com') return '#3498db';
-        if (cell.buildingType === 'ind') return '#95a5a6';
-        if (cell.buildingType === 'pub') return '#9b59b6'; // Purple/Public
-        return '#fff';
-    }
-
-    drawHeatmap(cell, px, py, w, h) {
-        let val = 0;
-        let color = [0,0,0];
-
-        switch(this.viewMode) {
-            case 'density': val = cell.population / 500; color = [255, 0, 0]; break;
-            case 'value': val = (cell.landValue + cell.accessibility) / 800; color = [0, 255, 0]; break;
-            case 'pollution': val = cell.pollution / 100; color = [200, 200, 200]; break;
-            case 'traffic': val = cell.traffic / 100; color = [255, 255, 0]; break;
-            case 'income': val = cell.income / 3; color = [0, 255, 255]; break;
-        }
-
-        val = Math.min(1, Math.max(0.1, val));
-        this.ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${val})`;
-        this.ctx.fillRect(px, py, w, h);
-    }
-
-    spawnMigrationParticle() {
-        // Visual flair only
     }
 }
 
-// --- 4. CONTROLLER ---
-
-let cityA, cityB;
-let renderA, renderB;
+// --- CONTROLLER ---
+let cityA, cityB, rendA, rendB;
 let isPaused = true;
-let isComparisonMode = false;
-let simulationSpeed = 0.05; // Years per frame approx
-let particles = [];
+let speed = 0.05;
 
-function initApp() {
-    cityA = new CitySimulator('planned');
-    cityB = new CitySimulator('spontaneous');
-
-    renderA = new CityRenderer(document.getElementById('canvas-A'), cityA);
-    renderB = new CityRenderer(document.getElementById('canvas-B'), cityB);
+const initApp = () => {
+    cityA = new City('planned');
+    cityB = new City('spontaneous');
+    rendA = new Renderer(document.getElementById('canvas-A'), cityA, document.getElementById('labels-A'));
+    rendB = new Renderer(document.getElementById('canvas-B'), cityB, document.getElementById('labels-B'));
 
     setupEvents();
-    requestAnimationFrame(update);
-}
+    loop();
+};
 
-function setupEvents() {
-    // Playback
-    const playBtn = document.getElementById('play-pause-btn');
-    playBtn.onclick = () => {
+const setupEvents = () => {
+    window.addEventListener('resize', () => { rendA.resize(); rendB.resize(); });
+
+    document.getElementById('play-pause').onclick = (e) => {
         isPaused = !isPaused;
-        playBtn.innerText = isPaused ? '▶' : '⏸';
+        e.target.innerText = isPaused ? '▶' : '⏸';
     };
 
-    // Speed
-    document.getElementById('speed-slider').oninput = (e) => {
-        simulationSpeed = e.target.value * 0.02;
-    };
+    document.getElementById('speed-slider').oninput = (e) => speed = e.target.value * 0.01;
 
-    // Timeline
     document.getElementById('year-slider').oninput = (e) => {
-        const targetYear = parseInt(e.target.value);
-        if (targetYear < cityA.year) {
-            // Reset to 1800
-            const oldParamsA = cityA.params;
-            const oldParamsB = cityB.params;
-            cityA = new CitySimulator('planned');
-            cityB = new CitySimulator('spontaneous');
-            cityA.params = oldParamsA;
-            cityB.params = oldParamsB;
-            renderA.city = cityA;
-            renderB.city = cityB;
-        }
-        // Fast forward to target
-        isPaused = true;
-        document.getElementById('play-pause-btn').innerText = '▶';
-        while (cityA.year < targetYear) {
-            cityA.update(1);
-            cityB.update(1);
-        }
+        const target = parseInt(e.target.value);
+        if(target < cityA.year) resetCities();
+        while(cityA.year < target) { cityA.update(1); cityB.update(1); }
         updateUI();
     };
 
-    // Comparison Toggle
     document.getElementById('btn-compare').onclick = (e) => {
-        isComparisonMode = !isComparisonMode;
-        document.getElementById('canvas-wrapper-B').classList.toggle('hidden', !isComparisonMode);
-        e.target.classList.toggle('active', isComparisonMode);
-        renderA.resize();
-        renderB.resize();
+        const vB = document.getElementById('viewport-B');
+        const hidden = vB.classList.toggle('hidden');
+        e.target.classList.toggle('active', !hidden);
+        rendA.resize(); rendB.resize();
     };
 
-    // Layer selection
     document.querySelectorAll('.layer-btn').forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            renderA.viewMode = btn.dataset.layer;
-            renderB.viewMode = btn.dataset.layer;
+            rendA.layer = rendB.layer = btn.dataset.layer;
         };
     });
 
+    // Inspector
+    const handleInspect = (e, sim, rend) => {
+        const rect = e.target.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / rend.cw);
+        const y = Math.floor((e.clientY - rect.top) / rend.ch);
+        const cell = sim.getCell(x, y);
+        if(!cell) return;
+
+        const insp = document.getElementById('inspector');
+        const content = document.getElementById('insp-content');
+        insp.style.display = 'block';
+        const dist = sim.neighborhoods[cell.districtId]?.name || "Rural";
+        document.getElementById('insp-title').innerText = "Distrito: " + dist;
+        content.innerHTML = `
+            <div class="insp-line"><span class="insp-label">Uso:</span><span class="insp-val">${cell.buildingType || 'Natural'}</span></div>
+            <div class="insp-line"><span class="insp-label">Población:</span><span class="insp-val">${Math.floor(cell.population)}</span></div>
+            <div class="insp-line"><span class="insp-label">Valor Suelo:</span><span class="insp-val">$${cell.landValue}</span></div>
+            <div class="insp-line"><span class="insp-label">Renta:</span><span class="insp-val">${['Baja','Media','Alta'][cell.income-1]}</span></div>
+            <div class="insp-line"><span class="insp-label">CO2:</span><span class="insp-val">${Math.floor(cell.pollution)}%</span></div>
+        `;
+    };
+    document.getElementById('canvas-A').onclick = (e) => handleInspect(e, cityA, rendA);
+    document.getElementById('canvas-B').onclick = (e) => handleInspect(e, cityB, rendB);
+
+    // Params
+    document.getElementById('sl-mig').oninput = (e) => {
+        const v = e.target.value; document.getElementById('val-mig').innerText = v + '%';
+        cityA.params.migration = cityB.params.migration = v/100;
+    };
+    document.getElementById('sl-inv').oninput = (e) => {
+        const v = e.target.value; document.getElementById('val-inv').innerText = v + '%';
+        cityA.params.invest = cityB.params.invest = v/100;
+    };
+
     // Modal
-    const modal = document.getElementById('edu-modal');
+    const modal = document.getElementById('modal-overlay');
     document.getElementById('btn-edu').onclick = () => {
-        showEducationalContent();
         modal.style.display = 'flex';
+        document.getElementById('modal-content').innerHTML = `
+            <h2>Dinámicas de Urbanización</h2>
+            <p>Este simulador aplica modelos de geografía económica para representar el crecimiento de las metrópolis.</p>
+            <h3>Conceptos Implementados:</h3>
+            <ul>
+                <li><strong>Plusvalía:</strong> El valor de la tierra aumenta según la accesibilidad al transporte y los servicios comerciales.</li>
+                <li><strong>Gentrificación:</strong> Los residentes de alta renta desplazan a los de baja renta en zonas de alto valor y baja contaminación.</li>
+                <li><strong>Externalidades:</strong> La industria impulsa el PIB pero degrada el valor residencial circundante debido a la polución.</li>
+                <li><strong>Modelo de Red:</strong> Las infraestructuras viales actúan como catalizadores de expansión urbana.</li>
+            </ul>
+        `;
     };
     document.querySelector('.close-modal').onclick = () => modal.style.display = 'none';
 
-    // Inspector
-    document.getElementById('canvas-A').onclick = (e) => handleCanvasClick(e, cityA, 'A');
-}
+    document.getElementById('btn-export').onclick = () => {
+        let csv = "Year,Population,GDP,Pollution,Value\n";
+        cityA.history.pop.forEach((p, i) => {
+            csv += `${1800+i},${p},${cityA.history.gdp[i]},${cityA.history.poll[i]},${cityA.history.value[i]}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'urban_stats.csv'; a.click();
+    };
 
-function handleCanvasClick(e, city, id) {
-    const rect = e.target.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / renderA.cellSizeX);
-    const y = Math.floor((e.clientY - rect.top) / renderA.cellSizeY);
-    const cell = city.getCell(x, y);
-    if (!cell) return;
+    // Historical Events
+    const wireEvent = (id, key) => {
+        document.getElementById(id).onclick = (e) => {
+            const active = e.target.classList.toggle('active');
+            cityA.events[key] = cityB.events[key] = active;
+        };
+    };
+    wireEvent('evt-rail', 'rail');
+    wireEvent('evt-indus', 'indus');
+    wireEvent('evt-boom', 'boom');
+    wireEvent('evt-crisis', 'crisis');
+};
 
-    const insp = document.getElementById(`inspector-${id}`);
-    const content = document.getElementById(`inspector-content-${id}`);
-    insp.style.display = 'block';
-    content.innerHTML = `
-        <p>Coordenadas: ${x}, ${y}</p>
-        <p>Uso Suelo: ${cell.buildingType || 'Ninguno'}</p>
-        <p>Población: ${Math.floor(cell.population)}</p>
-        <p>Valor: ${Math.floor(cell.landValue + cell.accessibility)}</p>
-        <p>Polución: ${Math.floor(cell.pollution)}</p>
-        <p>Infraestructura: ${cell.infrastructure || 'Natural'}</p>
-    `;
-}
+const resetCities = () => {
+    cityA = new City('planned'); cityB = new City('spontaneous');
+    rendA.city = cityA; rendB.city = cityB;
+    rendA.drawLabels(); rendB.drawLabels();
+};
 
-function update() {
-    if (!isPaused) {
-        cityA.update(simulationSpeed);
-        cityB.update(simulationSpeed);
+const loop = () => {
+    if(!isPaused) {
+        cityA.update(speed);
+        cityB.update(speed);
+        updateParticles();
+        if (Math.random() < 0.2) spawnMigration('A', rendA);
+        if (Math.random() < 0.2 && !document.getElementById('viewport-B').classList.contains('hidden')) spawnMigration('B', rendB);
         updateUI();
-
-        // Spawn migration particles randomly
-        if (Math.random() < simulationSpeed * 5) {
-            spawnMigration('A');
-            if (isComparisonMode) spawnMigration('B');
-        }
     }
-    renderA.draw();
-    if (isComparisonMode) renderB.draw();
+    rendA.render();
+    drawParticles(rendA, 'A');
+    if(!document.getElementById('viewport-B').classList.contains('hidden')) {
+        rendB.render();
+        drawParticles(rendB, 'B');
+    }
+    requestAnimationFrame(loop);
+};
 
-    requestAnimationFrame(update);
-}
-
-function spawnMigration(cityId) {
+// --- PARTICLES ---
+let particles = [];
+function spawnMigration(cityId, rend) {
     const side = Math.floor(Math.random() * 4);
     let x, y, vx, vy;
-    if (side === 0) { x = 0; y = Math.random() * WORLD_HEIGHT; vx = 0.2; vy = 0; }
-    else if (side === 1) { x = WORLD_WIDTH; y = Math.random() * WORLD_HEIGHT; vx = -0.2; vy = 0; }
-    else if (side === 2) { x = Math.random() * WORLD_WIDTH; y = 0; vx = 0; vy = 0.2; }
-    else { x = Math.random() * WORLD_WIDTH; y = WORLD_HEIGHT; vx = 0; vy = -0.2; }
-
+    if (side === 0) { x = 0; y = Math.random() * GRID_H; vx = 0.2; vy = (Math.random()-0.5)*0.1; }
+    else if (side === 1) { x = GRID_W; y = Math.random() * GRID_H; vx = -0.2; vy = (Math.random()-0.5)*0.1; }
+    else if (side === 2) { x = Math.random() * GRID_W; y = 0; vx = (Math.random()-0.5)*0.1; vy = 0.2; }
+    else { x = Math.random() * GRID_W; y = GRID_H; vx = (Math.random()-0.5)*0.1; vy = -0.2; }
     particles.push({ x, y, vx, vy, life: 1, cityId });
 }
 
-function updateUI() {
-    document.getElementById('year-display').innerText = Math.floor(cityA.year);
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= 0.01;
+        if (p.life <= 0) particles.splice(i, 1);
+    }
+}
+
+function drawParticles(rend, cityId) {
+    const ctx = rend.ctx;
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    particles.forEach(p => {
+        if (p.cityId !== cityId) return;
+        ctx.beginPath();
+        ctx.arc(p.x * rend.cw, p.y * rend.ch, 2, 0, Math.PI*2);
+        ctx.fill();
+    });
+}
+
+// UI updates are throttled via the main loop
+const updateUI = () => {
+    document.getElementById('year-val').innerText = Math.floor(cityA.year);
     document.getElementById('year-slider').value = Math.floor(cityA.year);
 
-    // Stats (Showing City A by default, or average?)
-    document.getElementById('stat-pop').innerText = cityA.stats.population.toLocaleString();
+    document.getElementById('stat-pop').innerText = cityA.stats.pop.toLocaleString();
+    document.getElementById('stat-gdp').innerText = `$${(cityA.stats.gdp / 1000).toFixed(1)}M`;
     document.getElementById('stat-dens').innerText = cityA.stats.density;
-    document.getElementById('stat-gdp').innerText = 'M$ ' + (cityA.stats.gdp / 1000).toFixed(1);
-    document.getElementById('stat-poll').innerText = cityA.stats.pollution > 50 ? 'Crítica' : 'Aceptable';
+    document.getElementById('stat-poll').innerText = cityA.stats.poll + '%';
 
-    // Update charts
-    drawMiniChart('chart-pop', cityA.history.pop, '#58a6ff');
-    drawMiniChart('chart-gdp', cityA.history.gdp, '#238636');
-    drawMiniChart('chart-poll', cityA.history.poll, '#da3633');
-    drawMiniChart('chart-value', cityA.history.value, '#f1c40f');
-}
+    drawChart('ch-pop', cityA.history.pop, '#58a6ff');
+    drawChart('ch-gdp', cityA.history.gdp, '#238636');
+    drawChart('ch-poll', cityA.history.poll, '#da3633');
+};
 
-function drawMiniChart(id, data, color) {
+const drawChart = (id, data, color) => {
     const container = document.getElementById(id);
     let canvas = container.querySelector('canvas');
-    if (!canvas) {
-        canvas = document.createElement('canvas');
-        container.appendChild(canvas);
+    if(!canvas) { canvas = document.createElement('canvas'); container.appendChild(canvas); }
+
+    // Only resize if needed
+    if(canvas.width !== container.clientWidth || canvas.height !== container.clientHeight) {
+        canvas.width = container.clientWidth; canvas.height = container.clientHeight;
     }
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
+
     const ctx = canvas.getContext('2d');
+    if(data.length < 2) return;
 
-    if (data.length < 2) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle = color; ctx.lineWidth = 2;
     ctx.beginPath();
-
-    const max = Math.max(...data) * 1.1;
+    const max = Math.max(...data, 1) * 1.1;
     const step = canvas.width / data.length;
-
-    for (let i = 0; i < data.length; i++) {
+    data.forEach((v, i) => {
         const x = i * step;
-        const y = canvas.height - (data[i] / max) * canvas.height;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    }
+        const y = canvas.height - (v/max)*canvas.height;
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
     ctx.stroke();
-}
+    ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(0, canvas.height);
+    ctx.fillStyle = color + "11"; ctx.fill();
+};
 
-function showEducationalContent() {
-    const text = document.getElementById('edu-text');
-    text.innerHTML = `
-        <p>Esta simulación permite explorar los conceptos fundamentales del urbanismo moderno y la geografía humana.</p>
-
-        <h3>Conceptos Clave:</h3>
-        <ul>
-            <li><strong>Urbanización:</strong> El proceso por el cual la población rural se desplaza a las ciudades, buscando mejores oportunidades económicas.</li>
-            <li><strong>Crecimiento Urbano:</strong> Puede ser <em>planificado</em> (Ciudad A), con zonificación y previsión de infraestructuras, o <em>espontáneo</em> (Ciudad B), que a menudo deriva en problemas de tráfico y falta de servicios.</li>
-            <li><strong>Centro Urbano (CBD):</strong> El núcleo de la ciudad donde el valor del suelo es más alto y la densidad de oficinas y comercios es máxima.</li>
-            <li><strong>Gentrificación:</strong> Proceso de transformación de un barrio degradado que aumenta su valor, expulsando a los residentes originales de renta baja (Rojo) y atrayendo a residentes de renta alta (Amarillo).</li>
-            <li><strong>Suburbanización:</strong> El crecimiento de zonas residenciales en la periferia, dependientes del transporte para llegar al centro.</li>
-            <li><strong>Industrialización:</strong> Motor económico que genera empleo pero también externalidades negativas como la contaminación y el ruido.</li>
-            <li><strong>Sostenibilidad:</strong> El equilibrio entre el crecimiento económico, la preservación de zonas verdes y la reducción de la polución.</li>
-        </ul>
-
-        <h3>¿Cómo interpretar el mapa?</h3>
-        <ul>
-            <li><span style="color:#e74c3c">■</span> <strong>Residencial Bajo:</strong> Viviendas de trabajadores, suelen estar cerca de industrias.</li>
-            <li><span style="color:#f1c40f">■</span> <strong>Residencial Alto:</strong> Barrios gentrificados o de lujo, lejos de la polución.</li>
-            <li><span style="color:#3498db">■</span> <strong>Comercial:</strong> Tiendas y oficinas, prosperan con la accesibilidad.</li>
-            <li><span style="color:#95a5a6">■</span> <strong>Industrial:</strong> Fábricas que impulsan el PIB pero dañan el entorno.</li>
-            <li><span style="color:#9b59b6">■</span> <strong>Servicios Públicos:</strong> Hospitales y escuelas, vitales para el bienestar.</li>
-        </ul>
-    `;
-}
-
-// Start
 initApp();
 
 </script>
