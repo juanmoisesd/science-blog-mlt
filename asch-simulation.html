@@ -6,17 +6,18 @@
     <title>Simulación del Experimento de Asch - Laboratorio de Psicología Social</title>
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #3498db;
-            --success-color: #27ae60;
-            --error-color: #e74c3c;
-            --warning-color: #f39c12;
-            --bg-color: #f4f7f6;
+            --primary-color: #1a2a3a;
+            --secondary-color: #2c3e50;
+            --accent-color: #00a8ff;
+            --success-color: #00d2d3;
+            --error-color: #ff6b6b;
+            --warning-color: #feca57;
+            --bg-color: #f0f3f7;
             --card-bg: #ffffff;
-            --text-color: #333;
-            --border-radius: 8px;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --text-color: #2d3436;
+            --border-radius: 12px;
+            --shadow: 0 10px 20px rgba(0,0,0,0.05);
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         * {
@@ -26,7 +27,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-main);
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
@@ -53,9 +54,9 @@
 
         #main-layout {
             display: grid;
-            grid-template-columns: 250px 1fr 300px;
-            gap: 1rem;
-            padding: 1rem;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 1.5rem;
+            padding: 1.5rem;
             flex-grow: 1;
         }
 
@@ -120,53 +121,88 @@
             gap: 1rem;
         }
 
-        #asch-cards {
+        .asch-cards {
             display: flex;
             justify-content: center;
             gap: 2rem;
-            padding: 1rem;
-            background-color: white;
+            padding: 2rem;
+            background-color: #fff;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
+            border: 1px solid #e1e8ed;
         }
 
         .card {
             text-align: center;
-            padding: 1rem;
-            border: 1px solid #ddd;
+            padding: 1.5rem;
+            border: 2px solid #f1f2f6;
             border-radius: var(--border-radius);
-            min-width: 200px;
+            min-width: 240px;
+            background: #fff;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #7f8c8d;
+            margin-bottom: 1rem;
         }
 
         .line-container {
-            height: 200px;
+            height: 220px;
             display: flex;
             align-items: flex-end;
             justify-content: space-around;
             padding: 20px;
-            background: #fafafa;
-            border: 1px inset #eee;
+            background: #fff;
+            border: 2px solid #2c3e50;
             margin-top: 10px;
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 4px;
         }
 
         .line-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            z-index: 2;
         }
 
         .line {
-            width: 15px;
-            background-color: #333;
-            transition: height 0.3s ease;
+            width: 12px;
+            background-color: #2d3436;
+            transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            border-radius: 2px 2px 0 0;
         }
 
-        .line.correct-highlight { background-color: var(--success-color); }
-        .line.error-highlight { background-color: var(--error-color); }
+        .line::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+        }
 
-        #experimental-room {
+        .line.correct-highlight { background-color: var(--success-color); box-shadow: 0 0 15px var(--success-color); }
+        .line.error-highlight { background-color: var(--error-color); box-shadow: 0 0 15px var(--error-color); }
+
+        .line-label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #2d3436;
+        }
+
+        .experimental-room {
             flex-grow: 1;
             background-color: #fff;
             border-radius: var(--border-radius);
@@ -175,18 +211,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
-            min-height: 400px;
-            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-            background-size: 20px 20px;
+            padding: 4rem 2rem;
+            min-height: 450px;
+            background-image:
+                linear-gradient(rgba(229, 231, 235, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(229, 231, 235, 0.5) 1px, transparent 1px);
+            background-size: 40px 40px;
+            border: 1px solid #e1e8ed;
+            perspective: 1000px;
         }
 
         .participants-grid {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
-            gap: 2rem;
-            max-width: 800px;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+        }
+
+        /* Semi-circle arrangement */
+        .room-laboratory .participants-grid {
+            height: 300px;
         }
 
         .avatar-container {
@@ -203,23 +250,57 @@
         }
 
         .avatar {
-            width: 60px;
-            height: 60px;
-            background-color: #ddd;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             margin-bottom: 0.5rem;
             position: relative;
-            border: 3px solid transparent;
-            transition: all 0.3s ease;
+            border: 4px solid #fff;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #f1f2f6;
+            overflow: hidden;
         }
 
-        .avatar.subject { border-color: var(--accent-color); background-color: #e1f5fe; }
-        .avatar.confederate { background-color: #f5f5f5; border-color: #ccc; }
-        .avatar.speaking { border-color: var(--warning-color); box-shadow: 0 0 15px var(--warning-color); }
+        .avatar svg {
+            width: 100%;
+            height: 100%;
+            fill: #95a5a6;
+        }
+
+        .avatar.subject {
+            border-color: var(--accent-color);
+            background: #e1f5fe;
+            box-shadow: 0 0 20px rgba(0, 168, 255, 0.2);
+        }
+        .avatar.subject svg { fill: var(--accent-color); }
+
+        .avatar.confederate {
+            background: #fff;
+        }
+
+        .avatar.speaking {
+            border-color: var(--warning-color);
+            transform: scale(1.15) translateY(-10px);
+            box-shadow: 0 15px 30px rgba(254, 202, 87, 0.3);
+        }
+
+        .avatar.under-pressure {
+            animation: pressurePulse 2s infinite;
+        }
+
+        @keyframes pressurePulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+
+        .avatar-container {
+            transition: all 0.5s ease;
+        }
 
         /* Virtual Environments Styles */
         .room-chat .participants-grid {
@@ -248,40 +329,68 @@
             margin-bottom: 0;
             flex-shrink: 0;
         }
+        .room-chat .avatar.subject { background: var(--accent-color); color: white; }
         .room-chat .bubble {
-            position: static;
+            position: relative;
             display: inline-block !important;
             margin-left: 10px;
             top: auto;
             transform: none !important;
             background: #e1f5fe;
             border-radius: 4px 15px 15px 15px;
+            border: 1px solid #b3e5fc;
+            padding: 8px 12px;
+            max-width: 80%;
+            font-weight: 500;
+        }
+        .room-chat .bubble::before {
+            content: "";
+            position: absolute;
+            left: -8px; top: 10px;
+            border-width: 8px 8px 8px 0;
+            border-style: solid;
+            border-color: transparent #e1f5fe transparent transparent;
         }
         .room-chat .indicator-bar { display: none; }
         .room-chat .label { display: none; }
 
         .room-video .participants-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
             width: 100%;
+            max-width: 800px;
             justify-content: center;
         }
         .room-video .avatar-container {
             width: 100%;
-            aspect-ratio: 4/3;
-            background: #2c3e50;
-            border: 2px solid #34495e;
+            aspect-ratio: 16/9;
+            background: #1a1a1a;
+            border: 2px solid #333;
             border-radius: 4px;
             justify-content: center;
-            padding: 10px;
+            padding: 5px;
             flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .room-video .avatar-container.active {
+            border-color: var(--success-color);
+            transform: scale(1.02);
+            z-index: 5;
         }
         .room-video .avatar {
             border-radius: 4px;
-            width: 70%;
-            height: 70%;
+            width: 60%;
+            height: 60%;
             background-color: #34495e;
+            border: none;
+            box-shadow: none;
+        }
+        .room-video .avatar.speaking {
+            border: 2px solid var(--warning-color);
+            transform: scale(1.05);
         }
         .room-video .bubble {
             top: 5px;
@@ -336,14 +445,22 @@
         }
 
         button {
-            padding: 0.6rem 1.2rem;
+            padding: 0.8rem 1.5rem;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             background-color: var(--accent-color);
             color: white;
+            box-shadow: 0 4px 10px rgba(0, 168, 255, 0.2);
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 168, 255, 0.3);
+            filter: brightness(1.05);
         }
 
         button:hover { filter: brightness(1.1); }
@@ -374,25 +491,35 @@
             border: 1px solid #eee;
         }
 
-        /* Modals */
+        /* Modals & Overlays */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(26, 42, 58, 0.8);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            transition: opacity 0.3s ease;
         }
 
         .modal {
             background: white;
-            padding: 2rem;
+            padding: 2.5rem;
             border-radius: var(--border-radius);
-            max-width: 800px;
-            max-height: 80vh;
+            max-width: 850px;
+            width: 90%;
+            max-height: 85vh;
             overflow-y: auto;
             position: relative;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
         }
 
         .close-btn {
@@ -401,7 +528,19 @@
             right: 1rem;
             background: #eee;
             color: #333;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+            font-size: 1.2rem;
+            line-height: 1;
+            padding-bottom: 3px;
         }
+        .close-btn:hover { background: #ddd; }
 
         @keyframes slideUp {
             from { transform: translateY(20px); opacity: 0; }
@@ -502,7 +641,7 @@
         <div id="overlay" class="hidden" onclick="ui.closeOverlays()">
             <div id="didactic-content" class="modal" onclick="event.stopPropagation()">
                 <!-- Didactic content will be here -->
-                <button class="close-btn" onclick="ui.closeOverlays()">Cerrar</button>
+                <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
             </div>
         </div>
     </div>
@@ -547,14 +686,46 @@
                 this.updateUI();
             }
 
-            render() {
+            addHistory(round, choice, isCorrect, wasConformity) {
+                this.history.push({ round, choice, isCorrect, wasConformity });
+            }
+
+            render(total, index) {
                 const container = document.createElement('div');
                 container.className = 'avatar-container';
                 container.dataset.participantId = this.id;
 
+                // Position in semi-circle for laboratory
+                const angle = (Math.PI / (total + 1)) * (index + 1);
+                const x = Math.cos(angle) * 300;
+                const y = Math.sin(angle) * 150;
+                container.dataset.x = x;
+                container.dataset.y = y;
+
                 const avatar = document.createElement('div');
                 avatar.className = `avatar ${this.isSubject ? 'subject' : 'confederate'}`;
-                avatar.textContent = this.isSubject ? "S" : this.id;
+
+                // SVG Avatar Silhouettes - Different Silhouettes for variety
+                const silhouettes = [
+                    "M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z",
+                    "M12,2A5,5 0 0,1 17,7C17,11.42 14.5,12.81 12,16C9.5,12.81 7,11.42 7,7A5,5 0 0,1 12,2M11,22V19H13V22H11M10,18C8.5,18 6,18.8 6,20V22H18V20C18,18.8 15.5,18 14,18H10Z",
+                    "M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C9.24,14 7,15.12 5.31,16.89C6.83,18.81 9.26,20 12,20C14.74,20 17.17,18.81 18.69,16.89C17,15.12 14.76,14 12,14Z",
+                    "M12,4C14.21,4 16,5.79 16,8C16,10.21 14.21,12 12,12C9.79,12 8,10.21 8,8C8,5.79 9.79,4 12,4M12,14C14.67,14 20,15.34 20,18V20H4V18C4,15.34 9.33,14 12,14Z"
+                ];
+                const path = silhouettes[this.id % silhouettes.length];
+                const svgContent = `<svg viewBox="0 0 24 24"><path d="${path}"/></svg>`;
+
+                avatar.innerHTML = svgContent;
+
+                const labelId = document.createElement('div');
+                labelId.style.position = 'absolute';
+                labelId.style.bottom = '2px';
+                labelId.style.fontSize = '10px';
+                labelId.style.background = 'rgba(255,255,255,0.8)';
+                labelId.style.padding = '1px 4px';
+                labelId.style.borderRadius = '4px';
+                labelId.textContent = this.isSubject ? "SUJETO" : `P${this.id}`;
+                avatar.appendChild(labelId);
 
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
@@ -565,8 +736,10 @@
                 if (this.isSubject) {
                     const pressureBar = this.createIndicator('Presión', 'pressure-fill', 'var(--warning-color)');
                     const anxietyBar = this.createIndicator('Ansiedad', 'anxiety-fill', 'var(--error-color)');
+                    const confidenceBar = this.createIndicator('Confianza', 'confidence-fill', 'var(--success-color)');
                     container.appendChild(pressureBar);
                     container.appendChild(anxietyBar);
+                    container.appendChild(confidenceBar);
                 }
 
                 this.element = container;
@@ -599,16 +772,24 @@
 
                 const pressureFill = this.element.querySelector('.pressure-fill');
                 const anxietyFill = this.element.querySelector('.anxiety-fill');
+                const confidenceFill = this.element.querySelector('.confidence-fill');
 
                 if (pressureFill) pressureFill.style.width = `${this.currentPressure}%`;
                 if (anxietyFill) anxietyFill.style.width = `${this.currentAnxiety}%`;
+                if (confidenceFill) confidenceFill.style.width = `${this.confidence}%`;
 
                 // Visual feedback on the avatar
                 const avatar = this.element.querySelector('.avatar');
-                if (this.currentAnxiety > 70) {
-                    avatar.style.boxShadow = `0 0 ${this.currentAnxiety/5}px var(--error-color)`;
+                if (this.currentPressure > 50) {
+                    avatar.classList.add('under-pressure');
                 } else {
-                    avatar.style.boxShadow = 'none';
+                    avatar.classList.remove('under-pressure');
+                }
+
+                if (this.currentAnxiety > 70) {
+                    avatar.style.borderColor = 'var(--error-color)';
+                } else {
+                    avatar.style.borderColor = this.isSubject ? 'var(--accent-color)' : '#fff';
                 }
             }
 
@@ -687,14 +868,24 @@
                 const grid = document.createElement('div');
                 grid.className = 'participants-grid';
 
-                this.participants.forEach(p => {
-                    grid.appendChild(p.render());
+                this.participants.forEach((p, i) => {
+                    const el = p.render(this.participants.length, i);
+                    if (this.config.environment === 'laboratory') {
+                        el.style.position = 'absolute';
+                        el.style.left = `calc(50% + ${el.dataset.x}px - 50px)`;
+                        el.style.top = `calc(50% + ${el.dataset.y}px - 100px)`;
+                    }
+                    grid.appendChild(el);
                 });
 
                 room.appendChild(grid);
             }
 
             generateTrial() {
+                // Clear highlights from previous round
+                const lines = this.container.querySelectorAll('.line');
+                lines.forEach(l => l.classList.remove('correct-highlight', 'error-highlight'));
+
                 const baseLength = 100 + Math.random() * 50;
                 const correctIndex = Math.floor(Math.random() * 3);
                 const options = [0, 0, 0];
@@ -741,8 +932,10 @@
                     const line = document.createElement('div');
                     line.className = 'line';
                     line.style.height = `${h}px`;
+                    line.id = `line-${this.containerId}-${i}`;
 
                     const label = document.createElement('span');
+                    label.className = 'line-label';
                     label.textContent = ['A', 'B', 'C'][i];
 
                     wrapper.appendChild(line);
@@ -785,6 +978,17 @@
                 this.rounds++;
                 this.isRunning = false;
 
+                // Update confidence of subject at the end of round
+                const subject = this.participants.find(p => p.isSubject);
+                if (subject && this.stats.totalRounds > 0) {
+                    // Small recovery of confidence if correct, or drop if conformed
+                    const lastResult = subject.history[subject.history.length - 1];
+                    if (lastResult) {
+                        if (lastResult.isCorrect) subject.selfEsteem = Math.min(100, subject.selfEsteem + 1);
+                        else if (lastResult.wasConformity) subject.selfEsteem = Math.max(0, subject.selfEsteem - 2);
+                    }
+                }
+
                 // Wait before next round if in automatic mode
                 if (this.mode === 'observation') {
                     setTimeout(() => this.startRound(), 2000);
@@ -826,7 +1030,11 @@
                 // Probabilistic decision engine
                 const decision = this.calculateDecision(subject, incorrectCount);
 
-                await subject.speak(decision, this.speed);
+                if (this.config.isPrivate) {
+                    await subject.speak("(En privado)", this.speed);
+                } else {
+                    await subject.speak(decision, this.speed);
+                }
                 this.recordResult(decision);
             }
 
@@ -871,6 +1079,20 @@
                 if (isCorrect) this.stats.correctCount++;
                 if (isConformity) this.stats.conformityCount++;
 
+                const subject = this.participants.find(p => p.isSubject);
+                subject.addHistory(this.rounds, answer, isCorrect, isConformity);
+
+                // Highlight correct/incorrect after subject speaks
+                const letterToIndex = {'A': 0, 'B': 1, 'C': 2};
+                const userIndex = letterToIndex[answer];
+                const correctIndex = this.currentRoundData.correctIndex;
+
+                const lines = this.container.querySelectorAll('.options-line-container .line');
+                lines.forEach((line, idx) => {
+                    if (idx === correctIndex) line.classList.add('correct-highlight');
+                    if (idx === userIndex && !isCorrect) line.classList.add('error-highlight');
+                });
+
                 this.updateStatsUI();
             }
 
@@ -908,7 +1130,11 @@
                 return new Promise(resolve => {
                     this.userResolve = (choice) => {
                         interactionArea.classList.add('hidden');
-                        subject.speak(choice, this.speed);
+                        if (this.config.isPrivate) {
+                            subject.speak("(En privado)", this.speed);
+                        } else {
+                            subject.speak(choice, this.speed);
+                        }
                         this.recordResult(choice);
                         resolve();
                     };
@@ -1010,7 +1236,7 @@
 
             updateConfig(key, value) {
                 const simulations = [this.sim, window.simulation2];
-                simulations.forEach(sim => {
+                simulations.forEach((sim, idx) => {
                     if (!sim) return;
 
                     if (key === 'speed') {
@@ -1022,9 +1248,14 @@
                     } else if (key === 'environment') {
                         sim.config[key] = value;
                         sim.renderParticipants();
-                    } else if (key === 'hasAlly' && sim === this.sim) {
-                        sim.config[key] = value;
-                    } else if (key !== 'hasAlly') {
+                    } else if (key === 'hasAlly') {
+                        // Apply Ally only to Sim 2 by default in comparison, or Sim 1 if alone
+                        if (!window.simulation2 || sim === window.simulation2) {
+                            sim.config[key] = (value === 'true' || value === true);
+                        }
+                    } else if (key === 'isPrivate') {
+                        sim.config[key] = (value === 'true' || value === true);
+                    } else {
                         sim.config[key] = value;
                     }
                 });
@@ -1089,28 +1320,71 @@
             renderDidacticContent() {
                 const content = document.getElementById('didactic-content');
                 content.innerHTML = `
-                    <button class="close-btn" onclick="ui.closeOverlays()">Cerrar</button>
-                    <h2 style="color: var(--accent-color); border-bottom: 2px solid #eee; padding-bottom: 10px;">El Experimento de Solomon Asch</h2>
-                    <div style="margin-top: 1.5rem;">
-                        <p><strong>¿Quién fue Solomon Asch?</strong> Fue un psicólogo polaco-estadounidense pionero en la psicología social. En la década de 1950, realizó una serie de experimentos fundamentales para comprender la presión de grupo.</p>
+                    <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid var(--accent-color); padding-bottom: 1rem;">
+                            <div style="width: 60px; height: 60px; background: var(--accent-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem;">Asch</div>
+                            <div>
+                                <h2 style="margin: 0; color: var(--primary-color);">El Experimento de Conformidad de Solomon Asch</h2>
+                                <p style="color: #7f8c8d; margin: 0;">Fundamentos de la Psicología Social</p>
+                            </div>
+                        </div>
 
-                        <h3 style="margin-top: 1.5rem;">El Experimento Original</h3>
-                        <p>Asch reunía a un grupo de personas (donde todos eran cómplices menos uno) para realizar una supuesta "prueba visual". Se les mostraba una línea patrón y debían decir cuál de otras tres líneas (A, B o C) era idéntica en longitud.</p>
-                        <p>Los cómplices daban respuestas incorrectas de forma unánime en ciertos ensayos clave. El objetivo era ver si el sujeto real se conformaba con la mayoría o mantenía su independencia.</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div>
+                                <h3 style="color: var(--secondary-color); margin-bottom: 0.5rem;">¿Qué es la Conformidad?</h3>
+                                <p>Es la tendencia de los individuos a cambiar sus percepciones, opiniones y comportamientos de manera que sean consistentes con las normas de un grupo.</p>
 
-                        <h3 style="margin-top: 1.5rem;">Conceptos Clave</h3>
-                        <ul>
-                            <li><strong>Conformidad Social:</strong> El acto de cambiar el propio comportamiento o pensamiento para encajar con un grupo.</li>
-                            <li><strong>Influencia Normativa:</strong> Conformarse para ser aceptado y evitar el rechazo o el aislamiento social.</li>
-                            <li><strong>Influencia Informativa:</strong> Conformarse porque creemos que la información del grupo es más correcta que la nuestra.</li>
-                            <li><strong>Efecto del Aliado:</strong> Asch descubrió que si solo una persona más del grupo rompía la unanimidad (dando la respuesta correcta), la conformidad del sujeto bajaba drásticamente (del 33% al 5%).</li>
-                        </ul>
+                                <h3 style="color: var(--secondary-color); margin-top: 1.5rem; margin-bottom: 0.5rem;">Los Tipos de Influencia</h3>
+                                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+                                    <p><strong>Influencia Normativa:</strong> Conformarse para evitar el rechazo social (miedo al "qué dirán").</p>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-color); margin-top: 0.5rem;">
+                                    <p><strong>Influencia Informativa:</strong> Conformarse porque creemos que el grupo tiene razón o sabe algo que nosotros no.</p>
+                                </div>
+                            </div>
 
-                        <h3 style="margin-top: 1.5rem;">Resultados</h3>
-                        <p>Aproximadamente el 75% de los participantes se conformaron al menos una vez. En promedio, los participantes se conformaron con la respuesta incorrecta de la mayoría en el 33% de los ensayos críticos.</p>
+                            <div style="background: #fff; border: 1px solid #eee; padding: 1.5rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                                <h3 style="color: var(--secondary-color); margin-bottom: 1rem; text-align: center;">Visualización del Experimento</h3>
+                                <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 120px; padding: 10px; border: 1px solid #ddd; margin-bottom: 10px;">
+                                    <div style="width: 10px; height: 80px; background: #333;"></div>
+                                    <div style="width: 10px; height: 60px; background: var(--error-color);"></div>
+                                    <div style="width: 10px; height: 80px; background: var(--success-color);"></div>
+                                    <div style="width: 10px; height: 95px; background: var(--error-color);"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-around; font-size: 0.7rem; font-weight: bold;">
+                                    <span>PATRÓN</span>
+                                    <span>A</span>
+                                    <span>B (CORRECTO)</span>
+                                    <span>C</span>
+                                </div>
+                                <p style="font-size: 0.8rem; color: #777; margin-top: 1rem; text-align: center; font-style: italic;">
+                                    "Aun cuando la evidencia física es clara, la presión social puede distorsionar nuestra respuesta pública."
+                                </p>
+                            </div>
+                        </div>
 
-                        <h3 style="margin-top: 1.5rem;">Aplicaciones Actuales</h3>
-                        <p>Hoy estos hallazgos nos ayudan a entender fenómenos como las burbujas en redes sociales, la polarización política, el pensamiento grupal en organizaciones y la importancia de la disidencia para una toma de decisiones saludable.</p>
+                        <div style="background: var(--primary-color); color: white; padding: 1.5rem; border-radius: 12px;">
+                            <h3 style="margin-top: 0; color: var(--accent-color);">Hallazgos Principales</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                                <div>
+                                    <div style="font-size: 2rem; font-weight: bold;">75%</div>
+                                    <div style="font-size: 0.8rem;">Se conformó al menos una vez</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 2rem; font-weight: bold;">33%</div>
+                                    <div style="font-size: 0.8rem;">Tasa de conformidad promedio</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 2rem; font-weight: bold;">5%</div>
+                                    <div style="font-size: 0.8rem;">Conformidad si hay un ALIADO</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 0.9rem; color: #7f8c8d; text-align: center;">
+                            Esta simulación utiliza algoritmos probabilísticos basados en estas variables históricas para recrear la dinámica social en tiempo real.
+                        </p>
                     </div>
                 `;
             }
@@ -1131,10 +1405,134 @@
 
                         if (sim) {
                             const p = sim.participants.find(part => part.id === id);
-                            alert(`ID: ${p.id}\nRol: ${p.isSubject ? 'Sujeto' : 'Cómplice'}\nAutoestima: ${Math.round(p.selfEsteem)}\nPensamiento Crítico: ${Math.round(p.criticalThinking)}\nAnsiedad: ${Math.round(p.currentAnxiety)}`);
+                            this.showParticipantDetails(p);
                         }
                     }
                 });
+            }
+
+            showParticipantDetails(p) {
+                const overlay = document.getElementById('overlay');
+                const content = document.getElementById('didactic-content');
+
+                content.innerHTML = `
+                    <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
+                    <div style="display: flex; gap: 2rem; align-items: flex-start; flex-direction: column;">
+                        <div style="display: flex; gap: 2rem; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 1.5rem;">
+                            <div class="avatar ${p.isSubject ? 'subject' : 'confederate'}" style="width: 120px; height: 120px; flex-shrink: 0;">
+                                <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+                            </div>
+                            <div style="flex-grow: 1;">
+                                <h2 style="margin-top: 0;">${p.name}</h2>
+                                <p style="color: #636e72; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 1.5rem;">
+                                    Rol: ${p.isSubject ? '<span style="color:var(--accent-color)">Sujeto Experimental</span>' : 'Cómplice del Experimento'}
+                                </p>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    ${this.renderTraitDetail('Autoestima', p.selfEsteem, 'var(--accent-color)')}
+                                    ${this.renderTraitDetail('Pensamiento Crítico', p.criticalThinking, 'var(--success-color)')}
+                                    ${this.renderTraitDetail('Ansiedad Social', p.socialAnxiety, 'var(--error-color)')}
+                                    ${this.renderTraitDetail('Necesidad de Aceptación', p.needForAcceptance, 'var(--warning-color)')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="width: 100%; margin-top: 1rem;">
+                            <h3>Historial de Decisiones</h3>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                                ${p.history.length === 0 ? '<p style="color:#999; font-style:italic;">No hay datos registrados aún.</p>' :
+                                    p.history.map(h => `
+                                        <div style="padding: 5px 10px; border-radius: 4px; background: ${h.isCorrect ? 'var(--success-color)' : (h.wasConformity ? 'var(--error-color)' : '#95a5a6')}; color: white; font-size: 0.8rem; min-width: 40px; text-align: center;">
+                                            R${h.round+1}: ${h.choice}
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+                            ${p.isSubject ? `
+                                <div style="margin-top: 1rem; padding: 1rem; background: #e1f5fe; border-radius: 8px; font-size: 0.9rem;">
+                                    <strong>Resumen de Presión:</strong> El sujeto ha enfrentado una presión promedio de ${Math.round(p.currentPressure)}% en la ronda actual.
+                                    Su nivel de ansiedad ha variado según la unanimidad de la mayoría.
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                overlay.classList.remove('hidden');
+                content.classList.remove('hidden');
+            }
+
+            generateReport() {
+                const s1 = simulation1.stats;
+                const s2 = window.simulation2 ? window.simulation2.stats : null;
+
+                const reportContent = `
+                    <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
+                    <div style="padding: 1rem;">
+                        <h2 style="color: var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 10px;">Informe de Resultados Experimentales</h2>
+                        <p style="font-size: 0.9rem; color: #7f8c8d;">Laboratorio de Psicología Social - Simulación Asch</p>
+
+                        <div style="display: grid; grid-template-columns: ${s2 ? '1fr 1fr' : '1fr'}; gap: 2rem; margin-top: 2rem;">
+                            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                                <h3 style="margin-top: 0; font-size: 1rem;">Condición A (Base)</h3>
+                                <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                                    <li style="margin-bottom: 0.5rem;"><strong>Ensayos:</strong> ${s1.totalRounds}</li>
+                                    <li style="margin-bottom: 0.5rem;"><strong>Tasa Conformidad:</strong> ${s1.totalRounds > 0 ? Math.round((s1.conformityCount/s1.totalRounds)*100) : 0}%</li>
+                                    <li style="margin-bottom: 0.5rem;"><strong>Tasa Acierto:</strong> ${s1.totalRounds > 0 ? Math.round((s1.correctCount/s1.totalRounds)*100) : 0}%</li>
+                                </ul>
+                            </div>
+                            ${s2 ? `
+                                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                                    <h3 style="margin-top: 0; font-size: 1rem;">Condición B (Comparación)</h3>
+                                    <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                                        <li style="margin-bottom: 0.5rem;"><strong>Ensayos:</strong> ${s2.totalRounds}</li>
+                                        <li style="margin-bottom: 0.5rem;"><strong>Tasa Conformidad:</strong> ${s2.totalRounds > 0 ? Math.round((s2.conformityCount/s2.totalRounds)*100) : 0}%</li>
+                                        <li style="margin-bottom: 0.5rem;"><strong>Tasa Acierto:</strong> ${s2.totalRounds > 0 ? Math.round((s2.correctCount/s2.totalRounds)*100) : 0}%</li>
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div style="margin-top: 2rem; background: #e1f5fe; padding: 1.5rem; border-radius: 12px;">
+                            <h3 style="margin-top: 0;">Análisis Comparativo con Solomon Asch (1951)</h3>
+                            <p style="margin-top: 1rem;">En el experimento original, la tasa de conformidad promedio fue del <strong>33%</strong>. </p>
+                            <p style="margin-top: 0.5rem;">
+                                ${s1.totalRounds > 0 ? (
+                                    (s1.conformityCount/s1.totalRounds*100 > 35) ?
+                                    "Los resultados actuales muestran una tendencia a la conformidad **superior** a la media histórica, sugiriendo una alta susceptibilidad a la influencia normativa en este sujeto." :
+                                    (s1.conformityCount/s1.totalRounds*100 < 20) ?
+                                    "La tasa de conformidad es notablemente **inferior** a la de Asch, indicando un alto grado de independencia perceptiva o factores protectores (como alto pensamiento crítico)." :
+                                    "La simulación se alinea estrechamente con los hallazgos clásicos de Asch."
+                                ) : "Inicie la simulación para obtener un análisis detallado."}
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.8rem; color: #999;">Generado automáticamente por AschLab v2.0</span>
+                            <button onclick="window.print()" style="background: var(--secondary-color);">Imprimir Informe</button>
+                        </div>
+                    </div>
+                `;
+
+                const overlay = document.getElementById('overlay');
+                const content = document.getElementById('didactic-content');
+                content.innerHTML = reportContent;
+                overlay.classList.remove('hidden');
+                content.classList.remove('hidden');
+            }
+
+            renderTraitDetail(label, value, color) {
+                return `
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.8rem; font-weight: 600; color: #7f8c8d;">${label}</span>
+                            <span style="font-weight: bold; color: ${color};">${Math.round(value)}%</span>
+                        </div>
+                        <div style="height: 6px; background: #eee; border-radius: 3px; overflow: hidden;">
+                            <div style="height: 100%; width: ${value}%; background: ${color}; transition: width 1s ease;"></div>
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -1214,6 +1612,7 @@
                         Promedio Conformidad: 33%<br>
                         Al menos una vez: 75%
                     </div>
+                    <button class="secondary" onclick="ui.generateReport()" style="width:100%; margin-top: 1rem; background: var(--primary-color);">Generar Informe Científico</button>
                 `;
             }
 
