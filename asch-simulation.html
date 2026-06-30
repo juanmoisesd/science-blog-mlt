@@ -3,28 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación del Experimento de Asch - Laboratorio de Psicología Social</title>
+    <title>Asch Conformity Lab - Simulación Profesional</title>
     <style>
         :root {
-            --primary-color: #1a2a3a;
-            --secondary-color: #2c3e50;
-            --accent-color: #00a8ff;
-            --success-color: #00d2d3;
-            --error-color: #ff6b6b;
-            --warning-color: #feca57;
-            --bg-color: #f0f3f7;
+            --primary-color: #0f172a;
+            --secondary-color: #1e293b;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
-            --text-color: #2d3436;
-            --border-radius: 12px;
-            --shadow: 0 10px 20px rgba(0,0,0,0.05);
-            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --text-color: #1e293b;
+            --border-radius: 16px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: var(--font-main);
@@ -34,23 +32,28 @@
             overflow-x: hidden;
         }
 
-        #app {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        #app { display: flex; flex-direction: column; min-height: 100vh; }
 
         header {
             background-color: var(--primary-color);
             color: white;
-            padding: 1rem 2rem;
+            padding: 1.25rem 2.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        h1 { font-size: 1.5rem; }
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
         #main-layout {
             display: grid;
@@ -67,13 +70,52 @@
         }
 
         .simulation-instance {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            background: #fff;
-            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .asch-cards {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem;
+            background-color: #f8fafc;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+            min-width: 200px;
+            background: #fff;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #94a3b8;
+            position: relative;
+            transform: rotate(-1deg);
+        }
+
+        .card:nth-child(2) { transform: rotate(1.5deg); }
+
+        .line-container {
+            height: 220px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px;
+            background: #fff;
+            border-bottom: 2px solid #334155;
             position: relative;
         }
 
@@ -82,30 +124,34 @@
             grid-template-columns: 1fr 1fr;
         }
 
-        .comparison-active .simulation-instance {
-            transform: scale(0.95);
-            transform-origin: top;
-        }
+        .comparison-active .simulation-instance { padding: 0.8rem; }
+        .comparison-active .asch-cards { padding: 1rem; gap: 1rem; }
+        .comparison-active .card { min-width: 120px; padding: 0.5rem; }
+        .comparison-active .line-container { height: 140px; padding: 10px; }
+        .comparison-active .experimental-room { min-height: 350px; padding: 1rem; }
 
         .instance-label {
             position: absolute;
-            top: 5px;
-            left: 5px;
+            top: 10px;
+            left: 10px;
             background: var(--primary-color);
             color: white;
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 4px;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
             z-index: 100;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         aside {
             background-color: var(--card-bg);
-            padding: 1.5rem;
+            padding: 2rem;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0;
             overflow-y: auto;
-            max-height: calc(100vh - 100px);
+            max-height: calc(100vh - 120px);
         }
 
         h2 {
@@ -115,110 +161,93 @@
             padding-bottom: 0.5rem;
         }
 
-        #simulation-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
         .asch-cards {
             display: flex;
             justify-content: center;
             gap: 2rem;
-            padding: 2rem;
-            background-color: #fff;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
             border: 1px solid #e1e8ed;
+            position: relative;
         }
 
         .card {
             text-align: center;
-            padding: 1.5rem;
-            border: 2px solid #f1f2f6;
+            padding: 1rem;
             border-radius: var(--border-radius);
-            min-width: 240px;
+            min-width: 180px;
             background: #fff;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: var(--accent-color);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
         }
 
         .card h3 {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
             color: #7f8c8d;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .line-container {
-            height: 220px;
+            height: 200px;
             display: flex;
             align-items: flex-end;
             justify-content: space-around;
-            padding: 20px;
+            padding: 15px;
             background: #fff;
             border: 2px solid #2c3e50;
-            margin-top: 10px;
             position: relative;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
             border-radius: 4px;
         }
 
-        .line-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            z-index: 2;
-        }
-
+        .line-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .line {
             width: 12px;
             background-color: #2d3436;
             transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
             border-radius: 2px 2px 0 0;
         }
-
-        .line::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
-        }
-
-        .line.correct-highlight { background-color: var(--success-color); box-shadow: 0 0 15px var(--success-color); }
-        .line.error-highlight { background-color: var(--error-color); box-shadow: 0 0 15px var(--error-color); }
-
-        .line-label {
-            font-weight: bold;
-            font-size: 0.9rem;
-            color: #2d3436;
-        }
+        .line.correct-highlight { background-color: var(--success-color); box-shadow: 0 0 10px var(--success-color); }
+        .line.error-highlight { background-color: var(--error-color); box-shadow: 0 0 10px var(--error-color); }
 
         .experimental-room {
             flex-grow: 1;
-            background-color: #fff;
+            background-color: #fcfcfc;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 4rem 2rem;
             min-height: 450px;
-            background-image:
-                linear-gradient(rgba(229, 231, 235, 0.5) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(229, 231, 235, 0.5) 1px, transparent 1px);
+            background-image: linear-gradient(#eef1f5 1px, transparent 1px), linear-gradient(90deg, #eef1f5 1px, transparent 1px);
             background-size: 40px 40px;
             border: 1px solid #e1e8ed;
-            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .room-chat .experimental-room { background-color: #e5ddd5; background-image: none; }
+        .room-video .experimental-room { background-color: #000; background-image: none; }
+
+        .pressure-map-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .laboratory-table {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) rotateX(60deg);
+            width: 90%;
+            max-width: 800px;
+            height: 250px;
+            background: #e1e8ed;
+            border: 4px solid #b2bec3;
+            border-radius: 150px 150px 20px 20px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.1);
+            z-index: 1;
         }
 
         .participants-grid {
@@ -229,11 +258,43 @@
             width: 100%;
             max-width: 900px;
             position: relative;
+            z-index: 10;
         }
 
-        /* Semi-circle arrangement */
-        .room-laboratory .participants-grid {
-            height: 300px;
+        .room-chat .participants-grid {
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 350px;
+            height: 90%;
+            padding: 20px;
+            background: #fff;
+            border-radius: 20px;
+            border: 6px solid #333;
+            overflow-y: auto;
+        }
+
+        .room-video .participants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            width: 95%;
+            padding: 20px;
+        }
+
+        .room-video .avatar-container {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            width: 100%;
+        }
+
+        .room-video .avatar-container::after {
+            content: attr(data-name);
+            color: white;
+            font-size: 0.7rem;
+            margin-top: 8px;
+            opacity: 0.8;
         }
 
         .avatar-container {
@@ -241,285 +302,128 @@
             flex-direction: column;
             align-items: center;
             width: 100px;
-            position: relative;
-            transition: transform 0.3s ease;
-        }
-
-        .avatar-container.active {
-            transform: scale(1.1);
-        }
-
-        .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 0.5rem;
-            position: relative;
-            border: 4px solid #fff;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background: #f1f2f6;
-            overflow: hidden;
-        }
-
-        .avatar svg {
-            width: 100%;
-            height: 100%;
-            fill: #95a5a6;
-        }
-
-        .avatar.subject {
-            border-color: var(--accent-color);
-            background: #e1f5fe;
-            box-shadow: 0 0 20px rgba(0, 168, 255, 0.2);
-        }
-        .avatar.subject svg { fill: var(--accent-color); }
-
-        .avatar.confederate {
-            background: #fff;
-        }
-
-        .avatar.speaking {
-            border-color: var(--warning-color);
-            transform: scale(1.15) translateY(-10px);
-            box-shadow: 0 15px 30px rgba(254, 202, 87, 0.3);
-        }
-
-        .avatar.under-pressure {
-            animation: pressurePulse 2s infinite;
-        }
-
-        @keyframes pressurePulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
-            70% { box-shadow: 0 0 0 20px rgba(255, 107, 107, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
-        }
-
-        .avatar-container {
             transition: all 0.5s ease;
         }
 
-        /* Virtual Environments Styles */
-        .room-chat .participants-grid {
-            flex-direction: column;
-            align-items: flex-start;
-            max-width: 100%;
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 15px;
-            background: #fff;
-            justify-content: flex-start;
-        }
-        .room-chat .avatar-container {
-            flex-direction: row;
-            width: 100%;
-            gap: 15px;
-            margin-bottom: 10px;
-            justify-content: flex-start;
+        .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            background: #f8fafc;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            display: flex;
+            justify-content: center;
             align-items: center;
-        }
-        .room-chat .avatar {
-            width: 40px;
-            height: 40px;
-            font-size: 0.9rem;
-            margin-bottom: 0;
-            flex-shrink: 0;
-        }
-        .room-chat .avatar.subject { background: var(--accent-color); color: white; }
-        .room-chat .bubble {
-            position: relative;
-            display: inline-block !important;
-            margin-left: 10px;
-            top: auto;
-            transform: none !important;
-            background: #e1f5fe;
-            border-radius: 4px 15px 15px 15px;
-            border: 1px solid #b3e5fc;
-            padding: 8px 12px;
-            max-width: 80%;
-            font-weight: 500;
-        }
-        .room-chat .bubble::before {
-            content: "";
-            position: absolute;
-            left: -8px; top: 10px;
-            border-width: 8px 8px 8px 0;
-            border-style: solid;
-            border-color: transparent #e1f5fe transparent transparent;
-        }
-        .room-chat .indicator-bar { display: none; }
-        .room-chat .label { display: none; }
-
-        .room-video .participants-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            width: 100%;
-            max-width: 800px;
-            justify-content: center;
-        }
-        .room-video .avatar-container {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 4px;
-            justify-content: center;
-            padding: 5px;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        .room-video .avatar-container.active {
-            border-color: var(--success-color);
-            transform: scale(1.02);
-            z-index: 5;
-        }
-        .room-video .avatar {
-            border-radius: 4px;
-            width: 60%;
-            height: 60%;
-            background-color: #34495e;
-            border: none;
-            box-shadow: none;
-        }
-        .room-video .avatar.speaking {
-            border: 2px solid var(--warning-color);
-            transform: scale(1.05);
-        }
-        .room-video .bubble {
-            top: 5px;
-            left: 5px;
-            font-size: 0.8rem;
-            opacity: 0.9;
+            transform: scale(var(--breath, 1));
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .indicator-bar {
-            width: 100%;
-            height: 4px;
-            background-color: #eee;
-            margin-top: 4px;
-            border-radius: 2px;
-            overflow: hidden;
+        .avatar.subject { border-color: var(--accent-color); border-width: 4px; }
+        .avatar.speaking { border-color: var(--warning-color); transform: scale(1.1) translateY(-5px); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+        .avatar.thinking { border-color: var(--accent-color); filter: grayscale(0.5); opacity: 0.8; }
+        .avatar.under-pressure { animation: pressurePulse 2s infinite; }
+
+        @keyframes pressurePulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
         }
 
-        .indicator-fill {
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease, background-color 0.3s ease;
-        }
-
-        .label { font-size: 0.7rem; color: #666; margin-top: 2px; }
+        .face-part { fill: none; stroke: #2c3e50; stroke-width: 1.5; stroke-linecap: round; }
 
         .bubble {
             position: absolute;
-            top: -40px;
+            top: -35px;
             background: white;
-            padding: 5px 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             font-weight: bold;
-            z-index: 10;
             display: none;
+            z-index: 100;
         }
 
-        #interaction-area {
-            background-color: var(--accent-color);
+        .room-chat .bubble {
+            position: relative;
+            display: inline-block !important;
+            top: 0;
+            margin-left: 10px;
+            background: #dcf8c6;
+            border-radius: 4px 15px 15px 15px;
+        }
+
+        .indicator-bar { width: 100%; height: 4px; background: #eee; margin-top: 4px; border-radius: 2px; overflow: hidden; }
+        .indicator-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
+        .label { font-size: 0.65rem; color: #777; margin-top: 2px; }
+
+        .interaction-area {
+            background: var(--secondary-color);
             color: white;
             padding: 1.5rem;
             border-radius: var(--border-radius);
             text-align: center;
-            animation: slideUp 0.5s ease-out;
+            margin-top: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.4s ease-out;
         }
 
-        .button-group {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1rem;
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
+
+        .button-group { display: flex; justify-content: center; gap: 0.8rem; margin-top: 0.8rem; }
 
         button {
-            padding: 0.8rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background-color: var(--accent-color);
+            background: var(--accent-color);
             color: white;
-            box-shadow: 0 4px 10px rgba(0, 168, 255, 0.2);
-            font-size: 0.9rem;
+            transition: all 0.2s;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 168, 255, 0.3);
-            filter: brightness(1.05);
-        }
-
-        button:hover { filter: brightness(1.1); }
-        button:active { transform: translateY(1px); }
-        button.secondary { background-color: var(--secondary-color); }
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        button.secondary { background: var(--secondary-color); }
 
         .hidden { display: none !important; }
 
         /* Stats visuals */
         .stat-item {
-            margin-bottom: 1rem;
-            background: #f8f9fa;
-            padding: 0.8rem;
-            border-radius: 4px;
-        }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--accent-color);
-        }
-        .stat-label { font-size: 0.8rem; color: #777; text-transform: uppercase; }
-
-        canvas {
-            width: 100% !important;
-            height: 150px !important;
-            margin-top: 1rem;
             background: #fff;
-            border: 1px solid #eee;
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow-sm);
         }
+        .stat-value { font-size: 1.75rem; font-weight: 800; color: var(--primary-color); letter-spacing: -0.025em; }
+        .stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem; }
 
-        /* Modals & Overlays */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(26, 42, 58, 0.8);
+            background: rgba(26, 42, 58, 0.85);
             backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-            transition: opacity 0.3s ease;
+            z-index: 2000;
         }
 
         .modal {
             background: white;
-            padding: 2.5rem;
+            padding: 3rem;
             border-radius: var(--border-radius);
             max-width: 850px;
-            width: 90%;
-            max-height: 85vh;
+            width: 95%;
+            max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-            animation: modalFadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-
-        @keyframes modalFadeIn {
-            from { transform: scale(0.9) translateY(20px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
+            box-shadow: var(--shadow-lg);
         }
 
         .close-btn {
@@ -527,694 +431,69 @@
             top: 1rem;
             right: 1rem;
             background: #eee;
-            color: #333;
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             border: none;
-            font-size: 1.2rem;
-            line-height: 1;
-            padding-bottom: 3px;
-        }
-        .close-btn:hover { background: #ddd; }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
-        /* Controls styling */
-        .control-group { margin-bottom: 1.2rem; }
-        label { display: block; font-size: 0.9rem; margin-bottom: 0.3rem; font-weight: 600; }
-        input[type="range"] { width: 100%; }
-        .range-val { font-size: 0.8rem; float: right; color: var(--accent-color); }
-
-        /* Comparison Mode */
-        .comparison-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
+        .control-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; font-weight: 600; }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        .range-val { float: right; color: var(--accent-color); }
     </style>
 </head>
-<body>
+<body class="laboratory-env">
     <div id="app">
         <header>
-            <h1>Simulación Interactiva: Experimento de Conformidad de Asch</h1>
+            <h1>AschLab: Simulador de Conformidad Social</h1>
             <div class="header-controls">
-                <button id="btn-didactic" onclick="ui.toggleDidactic()">Explicar Experimento</button>
-                <button id="btn-mode-toggle" onclick="ui.toggleMode()">Cambiar a Modo Participante</button>
+                <button onclick="ui.toggleDidactic()">Didáctica</button>
+                <button id="btn-mode-toggle" onclick="ui.toggleMode()" class="secondary">Modo Participante</button>
             </div>
         </header>
 
         <main id="main-layout">
             <aside id="control-panel">
                 <h2>Configuración</h2>
-                <div id="main-controls"></div>
-                <div class="control-group">
-                    <button class="secondary" id="btn-comparison-toggle" onclick="ui.toggleComparisonMode()" style="width:100%">Modo Comparación: OFF</button>
-                </div>
-            </aside>
-
-            <section id="simulations-wrapper">
-                <div id="sim-1" class="simulation-instance">
-                    <div class="asch-cards">
-                        <div class="card">
-                            <h3>Patrón</h3>
-                            <div class="line-container pattern-line-container"></div>
-                        </div>
-                        <div class="card">
-                            <h3>Opciones</h3>
-                            <div class="line-container options-line-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="experimental-room"></div>
-
-                    <div class="interaction-area hidden">
-                        <h3>Tu respuesta:</h3>
-                        <div class="button-group">
-                            <button onclick="simulation1.userSelect('A')">A</button>
-                            <button onclick="simulation1.userSelect('B')">B</button>
-                            <button onclick="simulation1.userSelect('C')">C</button>
-                        </div>
-                    </div>
-                    <div class="instance-label">Simulación A (Sin Aliado)</div>
-                </div>
-
-                <div id="sim-2" class="simulation-instance hidden">
-                    <div class="asch-cards">
-                        <div class="card">
-                            <h3>Patrón</h3>
-                            <div class="line-container pattern-line-container"></div>
-                        </div>
-                        <div class="card">
-                            <h3>Opciones</h3>
-                            <div class="line-container options-line-container"></div>
-                        </div>
-                    </div>
-
-                    <div class="experimental-room"></div>
-
-                    <div class="interaction-area hidden">
-                        <h3>Tu respuesta:</h3>
-                        <div class="button-group">
-                            <button onclick="window.simulation2.userSelect('A')">A</button>
-                            <button onclick="window.simulation2.userSelect('B')">B</button>
-                            <button onclick="window.simulation2.userSelect('C')">C</button>
-                        </div>
-                    </div>
-                    <div class="instance-label">Simulación B (Con Aliado)</div>
-                </div>
-            </section>
-
-            <aside id="stats-panel">
-                <h2>Estadísticas</h2>
-                <div id="stats-content"></div>
-            </aside>
-        </main>
-
-        <div id="overlay" class="hidden" onclick="ui.closeOverlays()">
-            <div id="didactic-content" class="modal" onclick="event.stopPropagation()">
-                <!-- Didactic content will be here -->
-                <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        /**
-         * Represents a participant in the experiment.
-         * Could be a confederate (actor) or the experimental subject.
-         */
-        class Participant {
-            constructor(id, isSubject = false) {
-                this.id = id;
-                this.isSubject = isSubject;
-                this.name = isSubject ? "Sujeto Experimental" : `Cómplice ${id}`;
-
-                // Internal psychological variables (0-100)
-                this.selfEsteem = 50 + (Math.random() * 40 - 20);
-                this.criticalThinking = 50 + (Math.random() * 40 - 20);
-                this.socialAnxiety = 30 + (Math.random() * 40 - 20);
-                this.needForAcceptance = 50 + (Math.random() * 40 - 20);
-
-                // State variables
-                this.currentPressure = 0;
-                this.currentAnxiety = this.socialAnxiety;
-                this.confidence = this.selfEsteem;
-                this.history = [];
-
-                this.element = null;
-            }
-
-            /**
-             * Updates internal state based on group pressure
-             */
-            updateState(groupPressure) {
-                if (!this.isSubject) return;
-
-                // Pressure increases anxiety and decreases confidence
-                this.currentPressure = groupPressure;
-                this.currentAnxiety = Math.min(100, this.socialAnxiety + (groupPressure * (this.needForAcceptance / 50)));
-                this.confidence = Math.max(0, this.selfEsteem - (groupPressure * (1 - this.criticalThinking / 100)));
-
-                this.updateUI();
-            }
-
-            addHistory(round, choice, isCorrect, wasConformity) {
-                this.history.push({ round, choice, isCorrect, wasConformity });
-            }
-
-            render(total, index) {
-                const container = document.createElement('div');
-                container.className = 'avatar-container';
-                container.dataset.participantId = this.id;
-
-                // Position in semi-circle for laboratory
-                const angle = (Math.PI / (total + 1)) * (index + 1);
-                const x = Math.cos(angle) * 300;
-                const y = Math.sin(angle) * 150;
-                container.dataset.x = x;
-                container.dataset.y = y;
-
-                const avatar = document.createElement('div');
-                avatar.className = `avatar ${this.isSubject ? 'subject' : 'confederate'}`;
-
-                // SVG Avatar Silhouettes - Different Silhouettes for variety
-                const silhouettes = [
-                    "M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z",
-                    "M12,2A5,5 0 0,1 17,7C17,11.42 14.5,12.81 12,16C9.5,12.81 7,11.42 7,7A5,5 0 0,1 12,2M11,22V19H13V22H11M10,18C8.5,18 6,18.8 6,20V22H18V20C18,18.8 15.5,18 14,18H10Z",
-                    "M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C9.24,14 7,15.12 5.31,16.89C6.83,18.81 9.26,20 12,20C14.74,20 17.17,18.81 18.69,16.89C17,15.12 14.76,14 12,14Z",
-                    "M12,4C14.21,4 16,5.79 16,8C16,10.21 14.21,12 12,12C9.79,12 8,10.21 8,8C8,5.79 9.79,4 12,4M12,14C14.67,14 20,15.34 20,18V20H4V18C4,15.34 9.33,14 12,14Z"
-                ];
-                const path = silhouettes[this.id % silhouettes.length];
-                const svgContent = `<svg viewBox="0 0 24 24"><path d="${path}"/></svg>`;
-
-                avatar.innerHTML = svgContent;
-
-                const labelId = document.createElement('div');
-                labelId.style.position = 'absolute';
-                labelId.style.bottom = '2px';
-                labelId.style.fontSize = '10px';
-                labelId.style.background = 'rgba(255,255,255,0.8)';
-                labelId.style.padding = '1px 4px';
-                labelId.style.borderRadius = '4px';
-                labelId.textContent = this.isSubject ? "SUJETO" : `P${this.id}`;
-                avatar.appendChild(labelId);
-
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-
-                container.appendChild(bubble);
-                container.appendChild(avatar);
-
-                if (this.isSubject) {
-                    const pressureBar = this.createIndicator('Presión', 'pressure-fill', 'var(--warning-color)');
-                    const anxietyBar = this.createIndicator('Ansiedad', 'anxiety-fill', 'var(--error-color)');
-                    const confidenceBar = this.createIndicator('Confianza', 'confidence-fill', 'var(--success-color)');
-                    container.appendChild(pressureBar);
-                    container.appendChild(anxietyBar);
-                    container.appendChild(confidenceBar);
-                }
-
-                this.element = container;
-                return container;
-            }
-
-            createIndicator(label, fillClass, color) {
-                const wrapper = document.createElement('div');
-                wrapper.style.width = '100%';
-
-                const labelElem = document.createElement('div');
-                labelElem.className = 'label';
-                labelElem.textContent = label;
-
-                const bar = document.createElement('div');
-                bar.className = 'indicator-bar';
-
-                const fill = document.createElement('div');
-                fill.className = `indicator-fill ${fillClass}`;
-                fill.style.backgroundColor = color;
-
-                bar.appendChild(fill);
-                wrapper.appendChild(labelElem);
-                wrapper.appendChild(bar);
-                return wrapper;
-            }
-
-            updateUI() {
-                if (!this.element || !this.isSubject) return;
-
-                const pressureFill = this.element.querySelector('.pressure-fill');
-                const anxietyFill = this.element.querySelector('.anxiety-fill');
-                const confidenceFill = this.element.querySelector('.confidence-fill');
-
-                if (pressureFill) pressureFill.style.width = `${this.currentPressure}%`;
-                if (anxietyFill) anxietyFill.style.width = `${this.currentAnxiety}%`;
-                if (confidenceFill) confidenceFill.style.width = `${this.confidence}%`;
-
-                // Visual feedback on the avatar
-                const avatar = this.element.querySelector('.avatar');
-                if (this.currentPressure > 50) {
-                    avatar.classList.add('under-pressure');
-                } else {
-                    avatar.classList.remove('under-pressure');
-                }
-
-                if (this.currentAnxiety > 70) {
-                    avatar.style.borderColor = 'var(--error-color)';
-                } else {
-                    avatar.style.borderColor = this.isSubject ? 'var(--accent-color)' : '#fff';
-                }
-            }
-
-            speak(text, duration = 1000) {
-                return new Promise(resolve => {
-                    const bubble = this.element.querySelector('.bubble');
-                    const avatar = this.element.querySelector('.avatar');
-
-                    bubble.textContent = text;
-                    bubble.style.display = 'block';
-                    avatar.classList.add('speaking');
-
-                    setTimeout(() => {
-                        bubble.style.display = 'none';
-                        avatar.classList.remove('speaking');
-                        resolve();
-                    }, duration);
-                });
-            }
-        }
-
-        class Simulation {
-            constructor(containerId, hasAlly = false) {
-                this.containerId = containerId;
-                this.participants = [];
-                this.rounds = 0;
-                this.currentRoundData = null;
-                this.isRunning = false;
-                this.mode = 'observation'; // 'observation' or 'participant'
-                this.speed = 1000;
-
-                // Configurable parameters
-                this.config = {
-                    numParticipants: 7,
-                    majorityBehavior: 'unanimous_error',
-                    hasAlly: hasAlly,
-                    subjectIndex: 6,
-                    isPrivate: false,
-                    environment: 'laboratory'
-                };
-
-                this.stats = {
-                    totalRounds: 0,
-                    conformityCount: 0,
-                    correctCount: 0,
-                    totalPressure: 0
-                };
-            }
-
-            get container() {
-                return document.getElementById(this.containerId);
-            }
-
-            init() {
-                this.generateParticipants();
-                this.renderParticipants();
-                this.updateStatsUI();
-            }
-
-            generateParticipants() {
-                this.participants = [];
-                for (let i = 0; i < this.config.numParticipants; i++) {
-                    const isSubject = (i === this.config.subjectIndex);
-                    this.participants.push(new Participant(i + 1, isSubject));
-                }
-            }
-
-            renderParticipants() {
-                const room = this.container.querySelector('.experimental-room');
-                room.innerHTML = '';
-
-                // Set environment class
-                room.classList.remove('room-laboratory', 'room-chat', 'room-video');
-                room.classList.add(`room-${this.config.environment}`);
-
-                const grid = document.createElement('div');
-                grid.className = 'participants-grid';
-
-                this.participants.forEach((p, i) => {
-                    const el = p.render(this.participants.length, i);
-                    if (this.config.environment === 'laboratory') {
-                        el.style.position = 'absolute';
-                        el.style.left = `calc(50% + ${el.dataset.x}px - 50px)`;
-                        el.style.top = `calc(50% + ${el.dataset.y}px - 100px)`;
-                    }
-                    grid.appendChild(el);
-                });
-
-                room.appendChild(grid);
-            }
-
-            generateTrial() {
-                // Clear highlights from previous round
-                const lines = this.container.querySelectorAll('.line');
-                lines.forEach(l => l.classList.remove('correct-highlight', 'error-highlight'));
-
-                const baseLength = 100 + Math.random() * 50;
-                const correctIndex = Math.floor(Math.random() * 3);
-                const options = [0, 0, 0];
-
-                options[correctIndex] = baseLength;
-
-                // Generate wrong options with significant difference
-                for (let i = 0; i < 3; i++) {
-                    if (i !== correctIndex) {
-                        const diff = (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 30);
-                        options[i] = baseLength + diff;
-                    }
-                }
-
-                this.currentRoundData = {
-                    pattern: baseLength,
-                    options: options,
-                    correctIndex: correctIndex,
-                    correctLetter: ['A', 'B', 'C'][correctIndex],
-                    confederateErrorLetter: ['A', 'B', 'C'][(correctIndex + 1 + Math.floor(Math.random() * 2)) % 3]
-                };
-
-                this.renderLines();
-            }
-
-            renderLines() {
-                const patternContainer = this.container.querySelector('.pattern-line-container');
-                const optionsContainer = this.container.querySelector('.options-line-container');
-
-                patternContainer.innerHTML = '';
-                optionsContainer.innerHTML = '';
-
-                // Pattern line
-                const pLine = document.createElement('div');
-                pLine.className = 'line';
-                pLine.style.height = `${this.currentRoundData.pattern}px`;
-                patternContainer.appendChild(pLine);
-
-                // Options
-                this.currentRoundData.options.forEach((h, i) => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'line-wrapper';
-
-                    const line = document.createElement('div');
-                    line.className = 'line';
-                    line.style.height = `${h}px`;
-                    line.id = `line-${this.containerId}-${i}`;
-
-                    const label = document.createElement('span');
-                    label.className = 'line-label';
-                    label.textContent = ['A', 'B', 'C'][i];
-
-                    wrapper.appendChild(line);
-                    wrapper.appendChild(label);
-                    optionsContainer.appendChild(wrapper);
-                });
-            }
-
-            updateStatsUI() {
-                if (window.statsManager) window.statsManager.update();
-            }
-
-            async startRound() {
-                if (this.isRunning) return;
-                this.isRunning = true;
-                this.generateTrial();
-
-                let incorrectCount = 0;
-                let responseHistory = [];
-
-                for (let i = 0; i < this.participants.length; i++) {
-                    const p = this.participants[i];
-
-                    if (p.isSubject) {
-                        if (this.mode === 'participant') {
-                            await this.handleUserInteraction(incorrectCount);
-                        } else {
-                            await this.handleAISubject(incorrectCount);
-                        }
-                    } else {
-                        const answer = this.getConfederateAnswer(i, incorrectCount);
-                        if (answer !== this.currentRoundData.correctLetter) {
-                            incorrectCount++;
-                        }
-                        responseHistory.push(answer);
-                        await p.speak(answer, this.speed);
-                    }
-                }
-
-                this.rounds++;
-                this.isRunning = false;
-
-                // Update confidence of subject at the end of round
-                const subject = this.participants.find(p => p.isSubject);
-                if (subject && this.stats.totalRounds > 0) {
-                    // Small recovery of confidence if correct, or drop if conformed
-                    const lastResult = subject.history[subject.history.length - 1];
-                    if (lastResult) {
-                        if (lastResult.isCorrect) subject.selfEsteem = Math.min(100, subject.selfEsteem + 1);
-                        else if (lastResult.wasConformity) subject.selfEsteem = Math.max(0, subject.selfEsteem - 2);
-                    }
-                }
-
-                // Wait before next round if in automatic mode
-                if (this.mode === 'observation') {
-                    setTimeout(() => this.startRound(), 2000);
-                }
-            }
-
-            getConfederateAnswer(index, currentErrorsInGroup) {
-                // Determine if this confederate should be an ally
-                if (this.config.hasAlly && index === 0) {
-                    return this.currentRoundData.correctLetter;
-                }
-
-                switch (this.config.majorityBehavior) {
-                    case 'unanimous_error':
-                        return this.currentRoundData.confederateErrorLetter;
-                    case 'unanimous_correct':
-                        return this.currentRoundData.correctLetter;
-                    case 'majority_error':
-                        // 75% error rate
-                        return Math.random() < 0.75 ? this.currentRoundData.confederateErrorLetter : this.currentRoundData.correctLetter;
-                    case 'mixed':
-                        return Math.random() < 0.5 ? this.currentRoundData.confederateErrorLetter : this.currentRoundData.correctLetter;
-                    default:
-                        return this.currentRoundData.correctLetter;
-                }
-            }
-
-            async handleAISubject(incorrectCount) {
-                const subject = this.participants.find(p => p.isSubject);
-                const totalConfederates = this.participants.length - 1;
-
-                // Calculate pressure: proportional to the number of people who gave the same (wrong) answer
-                const pressureLevel = (incorrectCount / totalConfederates) * 100;
-                subject.updateState(pressureLevel);
-
-                // Add some artificial thinking time
-                await new Promise(resolve => setTimeout(resolve, this.speed / 2));
-
-                // Probabilistic decision engine
-                const decision = this.calculateDecision(subject, incorrectCount);
-
-                if (this.config.isPrivate) {
-                    await subject.speak("(En privado)", this.speed);
-                } else {
-                    await subject.speak(decision, this.speed);
-                }
-                this.recordResult(decision);
-            }
-
-            calculateDecision(subject, incorrectCount) {
-                if (incorrectCount === 0) return this.currentRoundData.correctLetter;
-
-                // Private response significantly reduces conformity
-                if (this.config.isPrivate) {
-                    // Even in private, there's a tiny bit of doubt or error
-                    return Math.random() < 0.95 ? this.currentRoundData.correctLetter : this.currentRoundData.confederateErrorLetter;
-                }
-
-                // Factors (0-1)
-                let pressureFactor = incorrectCount / (this.participants.length - 1);
-
-                // Virtual environments reduce pressure slightly
-                if (this.config.environment === 'chat') pressureFactor *= 0.7;
-                if (this.config.environment === 'video') pressureFactor *= 0.85;
-
-                const anxietyFactor = subject.currentAnxiety / 100;
-                const independenceFactor = (subject.criticalThinking + subject.selfEsteem) / 200;
-
-                // Probability of conformity
-                // Base probability increases with pressure and anxiety, decreases with independence
-                let conformityProb = (pressureFactor * 0.6) + (anxietyFactor * 0.3) - (independenceFactor * 0.4);
-
-                // Ensure probability is within [0.1, 0.9] range for some realism
-                conformityProb = Math.max(0.05, Math.min(0.95, conformityProb));
-
-                if (Math.random() < conformityProb) {
-                    return this.currentRoundData.confederateErrorLetter;
-                } else {
-                    return this.currentRoundData.correctLetter;
-                }
-            }
-
-            recordResult(answer) {
-                const isCorrect = (answer === this.currentRoundData.correctLetter);
-                const isConformity = (!isCorrect && this.config.majorityBehavior !== 'unanimous_correct');
-
-                this.stats.totalRounds++;
-                if (isCorrect) this.stats.correctCount++;
-                if (isConformity) this.stats.conformityCount++;
-
-                const subject = this.participants.find(p => p.isSubject);
-                subject.addHistory(this.rounds, answer, isCorrect, isConformity);
-
-                // Highlight correct/incorrect after subject speaks
-                const letterToIndex = {'A': 0, 'B': 1, 'C': 2};
-                const userIndex = letterToIndex[answer];
-                const correctIndex = this.currentRoundData.correctIndex;
-
-                const lines = this.container.querySelectorAll('.options-line-container .line');
-                lines.forEach((line, idx) => {
-                    if (idx === correctIndex) line.classList.add('correct-highlight');
-                    if (idx === userIndex && !isCorrect) line.classList.add('error-highlight');
-                });
-
-                this.updateStatsUI();
-            }
-
-            animate() {
-                const subject = this.participants.find(p => p.isSubject);
-                if (subject && subject.element) {
-                    const avatar = subject.element.querySelector('.avatar');
-                    const time = Date.now() / 1000;
-
-                    // Subtle breathing effect based on anxiety
-                    const breathScale = 1 + Math.sin(time * (1 + subject.currentAnxiety / 50)) * (subject.currentAnxiety / 1000);
-                    avatar.style.transform = `scale(${breathScale})`;
-
-                    // Subtle shaking if anxiety is very high
-                    if (subject.currentAnxiety > 80) {
-                        const shake = (Math.random() - 0.5) * (subject.currentAnxiety - 80) / 10;
-                        avatar.style.marginLeft = `${shake}px`;
-                    } else {
-                        avatar.style.marginLeft = '0px';
-                    }
-                }
-
-                requestAnimationFrame(() => this.animate());
-            }
-
-            async handleUserInteraction(incorrectCount) {
-                const subject = this.participants.find(p => p.isSubject);
-                const totalConfederates = this.participants.length - 1;
-                const pressureLevel = (incorrectCount / totalConfederates) * 100;
-                subject.updateState(pressureLevel);
-
-                const interactionArea = this.container.querySelector('.interaction-area');
-                interactionArea.classList.remove('hidden');
-
-                return new Promise(resolve => {
-                    this.userResolve = (choice) => {
-                        interactionArea.classList.add('hidden');
-                        if (this.config.isPrivate) {
-                            subject.speak("(En privado)", this.speed);
-                        } else {
-                            subject.speak(choice, this.speed);
-                        }
-                        this.recordResult(choice);
-                        resolve();
-                    };
-                });
-            }
-
-            userSelect(choice) {
-                if (this.userResolve) {
-                    this.userResolve(choice);
-                    this.userResolve = null;
-                }
-            }
-
-            toggleMode() {
-                this.mode = (this.mode === 'observation' ? 'participant' : 'observation');
-                const btn = document.getElementById('btn-mode-toggle');
-                btn.textContent = (this.mode === 'observation' ? 'Cambiar a Modo Participante' : 'Cambiar a Modo Observación');
-
-                // Restart simulation if it's running
-                if (this.isRunning) {
-                    // Logic to reset current round might be complex, let's just let it finish
-                } else if (this.mode === 'observation') {
-                    this.startRound();
-                }
-            }
-        }
-
-        class UIManager {
-            constructor(simulation) {
-                this.sim = simulation;
-                this.isDidacticOpen = false;
-            }
-
-            init() {
-                this.renderControls();
-                this.setupEventListeners();
-                this.sim.animate(); // Start animation loop
-                this.sim.startRound();
-            }
-
-            renderControls() {
-                const panel = document.getElementById('main-controls');
-                panel.innerHTML = `
-                    <div class="control-group">
-                        <label>Participantes: <span class="range-val" id="val-numParticipants">${this.sim.config.numParticipants}</span></label>
-                        <input type="range" min="3" max="12" value="${this.sim.config.numParticipants}" oninput="ui.updateConfig('numParticipants', this.value)">
-                    </div>
-                    <div class="control-group">
-                        <label>Comportamiento Mayoría:</label>
-                        <select onchange="ui.updateConfig('majorityBehavior', this.value)" style="width:100%; padding: 5px;">
-                            <option value="unanimous_error">Error Unánime</option>
-                            <option value="unanimous_correct">Acierto Unánime</option>
-                            <option value="majority_error">Mayoría Errónea (75%)</option>
-                            <option value="mixed">Mezclado (50%)</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label title="Añade un cómplice que responde correctamente">
-                            <input type="checkbox" onchange="ui.updateConfig('hasAlly', this.checked)"> Presencia de Aliado
-                        </label>
-                    </div>
-                    <div class="control-group">
-                        <label title="Las respuestas del sujeto no son escuchadas por el grupo">
-                            <input type="checkbox" onchange="ui.updateConfig('isPrivate', this.checked)"> Respuesta Privada
-                        </label>
-                    </div>
+                <div id="main-controls">
                     <div class="control-group">
                         <label>Entorno:</label>
-                        <select onchange="ui.updateConfig('environment', this.value)" style="width:100%; padding: 5px;">
+                        <select id="env-select" onchange="ui.updateConfig('environment', this.value)" style="width:100%; padding: 5px;">
                             <option value="laboratory">Laboratorio Presencial</option>
-                            <option value="chat">Chat Virtual (WhatsApp style)</option>
-                            <option value="video">Videollamada (Zoom style)</option>
+                            <option value="chat">Chat Grupal</option>
+                            <option value="video">Videollamada</option>
                         </select>
                     </div>
                     <div class="control-group">
-                        <label>Velocidad (ms): <span class="range-val" id="val-speed">${this.sim.speed}</span></label>
-                        <input type="range" min="200" max="3000" step="100" value="${this.sim.speed}" oninput="ui.updateConfig('speed', this.value)">
+                        <label>Velocidad (ms): <span class="range-val" id="val-speed">1000</span></label>
+                        <input type="range" min="300" max="3000" step="100" value="1000" oninput="ui.updateConfig('speed', this.value)">
                     </div>
-                    <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #eee;">
-                    <h3>Variables del Sujeto</h3>
+                    <div class="control-group">
+                        <label>Nº Participantes: <span class="range-val" id="val-numParticipants">7</span></label>
+                        <input type="range" min="6" max="10" step="1" value="7" oninput="ui.updateConfig('numParticipants', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label>Comportamiento Grupo:</label>
+                        <select id="behavior-select" onchange="ui.updateConfig('behavior', this.value)" style="width:100%; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <option value="unanimousError">Error Unánime (Asch)</option>
+                            <option value="majorityError">Mayoría Error</option>
+                            <option value="random">Respuestas Aleatorias</option>
+                            <option value="allCorrect">Todos Correctos</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label><input type="checkbox" onchange="ui.updateConfig('isPrivate', this.checked)"> Respuesta Privada</label>
+                    </div>
+                    <div class="control-group">
+                        <label><input type="checkbox" id="check-ally" onchange="ui.updateConfig('hasAlly', this.checked)"> Presencia de Aliado</label>
+                    </div>
+                    <hr style="margin: 1.5rem 0; opacity: 0.1;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem;">Variables del Sujeto</h3>
                     <div class="control-group">
                         <label>Autoestima: <span class="range-val" id="val-selfEsteem">50</span></label>
                         <input type="range" min="0" max="100" value="50" oninput="ui.updateSubjectTrait('selfEsteem', this.value)">
@@ -1228,516 +507,607 @@
                         <input type="range" min="0" max="100" value="30" oninput="ui.updateSubjectTrait('socialAnxiety', this.value)">
                     </div>
                     <div class="control-group">
-                        <button class="secondary" onclick="statsManager.reset()" style="width:100%; margin-bottom: 5px;">Reiniciar Estadísticas</button>
-                        <button class="secondary" onclick="location.reload()" style="width:100%">Reiniciar Todo</button>
+                        <label>Confianza Perceptiva: <span class="range-val" id="val-perceptionConfidence">60</span></label>
+                        <input type="range" min="0" max="100" value="60" oninput="ui.updateSubjectTrait('perceptionConfidence', this.value)">
                     </div>
-                `;
+                    <div class="control-group">
+                        <label>Necesidad de Aceptación: <span class="range-val" id="val-needAcceptance">40</span></label>
+                        <input type="range" min="0" max="100" value="40" oninput="ui.updateSubjectTrait('needAcceptance', this.value)">
+                    </div>
+                    <button class="secondary" id="btn-comparison-toggle" onclick="ui.toggleComparisonMode()" style="width:100%; margin-top: 1rem;">Modo Comparación: OFF</button>
+                </div>
+            </aside>
+
+            <section id="simulations-wrapper">
+                <div id="sim-1" class="simulation-instance">
+                    <div class="instance-label">Simulación A (Control)</div>
+                    <div class="asch-cards">
+                        <div class="card">
+                            <h3>Patrón</h3>
+                            <div class="line-container pattern-line-container"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Opciones</h3>
+                            <div class="line-container options-line-container"></div>
+                        </div>
+                    </div>
+                    <div class="experimental-room"></div>
+                    <div class="interaction-area hidden">
+                        <h3>¿Cuál es la línea correcta?</h3>
+                        <div class="button-group">
+                            <button onclick="simulation1.userSelect('A')">A</button>
+                            <button onclick="simulation1.userSelect('B')">B</button>
+                            <button onclick="simulation1.userSelect('C')">C</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sim-2" class="simulation-instance hidden">
+                    <div class="instance-label">Simulación B (Experimento)</div>
+                    <div class="asch-cards">
+                        <div class="card">
+                            <h3>Patrón</h3>
+                            <div class="line-container pattern-line-container"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Opciones</h3>
+                            <div class="line-container options-line-container"></div>
+                        </div>
+                    </div>
+                    <div class="experimental-room"></div>
+                    <div class="interaction-area hidden">
+                        <h3>¿Cuál es la línea correcta?</h3>
+                        <div class="button-group">
+                            <button onclick="window.simulation2.userSelect('A')">A</button>
+                            <button onclick="window.simulation2.userSelect('B')">B</button>
+                            <button onclick="window.simulation2.userSelect('C')">C</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside id="stats-panel">
+                <h2>Resultados</h2>
+                <div id="stats-content">
+                    <div class="stat-item"><div class="stat-label">Ensayos</div><div class="stat-value" id="stat-rounds">0</div></div>
+                    <div class="stat-item"><div class="stat-label">Conformidad</div><div class="stat-value" id="stat-conformity">0%</div></div>
+                    <canvas id="conformity-chart"></canvas>
+                    <canvas id="histogram-chart" style="height: 100px !important;"></canvas>
+                    <button class="secondary" onclick="ui.generateReport()" style="width:100%; margin-top: 1rem; background: var(--primary-color);">Informe Científico</button>
+                </div>
+            </aside>
+        </main>
+
+        <div id="overlay" class="hidden" onclick="ui.closeOverlays()">
+            <div id="didactic-content" class="modal" onclick="event.stopPropagation()">
+                <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class Participant {
+            constructor(id, isSubject = false) {
+                this.id = id;
+                this.isSubject = isSubject;
+                this.name = isSubject ? "Sujeto" : `Cómplice ${id}`;
+                this.selfEsteem = 50 + (Math.random() * 20 - 10);
+                this.criticalThinking = 50 + (Math.random() * 20 - 10);
+                this.socialAnxiety = 30;
+                this.perceptionConfidence = 60;
+                this.needAcceptance = 40;
+                this.currentPressure = 0;
+                this.currentAnxiety = 30;
+                this.history = [];
+                this.element = null;
             }
 
-            updateConfig(key, value) {
-                const simulations = [this.sim, window.simulation2];
-                simulations.forEach((sim, idx) => {
-                    if (!sim) return;
+            render(total, index) {
+                const container = document.createElement('div');
+                container.className = 'avatar-container';
+                container.dataset.participantId = this.id;
+                container.dataset.name = this.name;
 
-                    if (key === 'speed') {
-                        sim.speed = parseInt(value);
-                    } else if (key === 'numParticipants') {
-                        sim.config[key] = parseInt(value);
-                        sim.config.subjectIndex = sim.config.numParticipants - 1;
-                        sim.init();
-                    } else if (key === 'environment') {
-                        sim.config[key] = value;
-                        sim.renderParticipants();
-                    } else if (key === 'hasAlly') {
-                        // Apply Ally only to Sim 2 by default in comparison, or Sim 1 if alone
-                        if (!window.simulation2 || sim === window.simulation2) {
-                            sim.config[key] = (value === 'true' || value === true);
-                        }
-                    } else if (key === 'isPrivate') {
-                        sim.config[key] = (value === 'true' || value === true);
+                const angle = (Math.PI / (total + 1)) * (index + 1);
+                container.dataset.x = Math.cos(angle) * 320;
+                container.dataset.y = Math.sin(angle) * 160;
+
+                const avatar = document.createElement('div');
+                avatar.className = `avatar ${this.isSubject ? 'subject' : 'confederate'}`;
+
+                // Variation in skin tones and shirt colors
+                const skinTone = `hsl(${30 + (this.id * 7) % 20}, ${30 + (this.id * 5) % 30}%, ${60 + (this.id * 3) % 20}%)`;
+                const shirtColor = this.isSubject ? 'var(--accent-color)' : `hsl(${210 + (this.id * 40) % 60}, 40%, 40%)`;
+
+                const heads = [
+                    "M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4",
+                    "M12,3A4.5,5 0 0,1 16.5,8A4.5,5 0 0,1 12,13A4.5,5 0 0,1 7.5,8A4.5,5 0 0,1 12,3",
+                    "M12,4A4,4 0 0,1 15.5,8A4,4 0 0,1 12,12.5A4,4 0 0,1 8.5,8A4,4 0 0,1 12,4"
+                ];
+                const head = heads[this.id % heads.length];
+
+                avatar.innerHTML = `
+                <svg viewBox="0 0 24 24" style="width:100%;height:100%">
+                    <path class="silhouette body" d="M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" fill="${shirtColor}"/>
+                    <path class="silhouette head" d="${head}" fill="${skinTone}"/>
+                    <g class="face">
+                        <path class="face-part eyebrow-l" d="M9,7 Q10,6.5 11,7" />
+                        <path class="face-part eyebrow-r" d="M13,7 Q14,6.5 15,7" />
+                        <path class="face-part mouth" d="M10,11 Q12,11.5 14,11" />
+                    </g>
+                </svg><div class="bubble"></div>`;
+
+                if (this.isSubject) {
+                    container.appendChild(this.createBar('Presión', 'pressure-fill', 'var(--warning-color)'));
+                    container.appendChild(this.createBar('Ansiedad', 'anxiety-fill', 'var(--error-color)'));
+                }
+
+                this.element = container;
+                container.appendChild(avatar);
+                return container;
+            }
+
+            createBar(label, cls, color) {
+                const w = document.createElement('div');
+                w.style.width = '100%';
+                w.innerHTML = `<div class="label">${label}</div><div class="indicator-bar"><div class="indicator-fill ${cls}" style="background-color:${color}"></div></div>`;
+                return w;
+            }
+
+            updateUI() {
+                if (!this.element) return;
+                if (this.isSubject) {
+                    this.element.querySelector('.pressure-fill').style.width = `${this.currentPressure}%`;
+                    this.element.querySelector('.anxiety-fill').style.width = `${this.currentAnxiety}%`;
+                }
+
+                const mouth = this.element.querySelector('.mouth');
+                const ebL = this.element.querySelector('.eyebrow-l');
+                const ebR = this.element.querySelector('.eyebrow-r');
+
+                // Nuanced facial expression based on anxiety
+                const anxietyFactor = this.currentAnxiety / 100;
+                const mouthCurve = 11.5 + (anxietyFactor * 1.5);
+                mouth.setAttribute('d', `M10,11 Q12,${mouthCurve} 14,11`);
+
+                const ebY = 7 - (anxietyFactor * 1);
+                ebL.setAttribute('d', `M9,${ebY} Q10,${ebY-0.5} 11,${ebY+0.2}`);
+                ebR.setAttribute('d', `M13,${ebY+0.2} Q14,${ebY-0.5} 15,${ebY}`);
+
+                if (this.isSubject) {
+                    this.element.querySelector('.avatar').classList.toggle('under-pressure', this.currentPressure > 50);
+                }
+            }
+
+            async speak(text, duration) {
+                const b = this.element.querySelector('.bubble');
+                const a = this.element.querySelector('.avatar');
+
+                // Thinking phase
+                a.classList.add('thinking');
+                await new Promise(r => setTimeout(r, duration * 0.4));
+                a.classList.remove('thinking');
+
+                // Speaking phase
+                b.textContent = text;
+                b.style.display = 'block';
+                a.classList.add('speaking');
+                await new Promise(r => setTimeout(res => {
+                    b.style.display = 'none';
+                    a.classList.remove('speaking');
+                    r();
+                }, duration));
+            }
+        }
+
+        class Simulation {
+            constructor(id, hasAlly = false) {
+                this.containerId = id;
+                this.config = { numParticipants: 7, hasAlly, environment: 'laboratory', isPrivate: false, behavior: 'unanimousError' };
+                this.stats = { total: 0, conformity: 0, correct: 0 };
+                this.participants = [];
+                this.speed = 1000;
+                this.isRunning = false;
+                this.mode = 'observation';
+                this.history = [];
+            }
+
+            get container() { return document.getElementById(this.containerId); }
+
+            init() {
+                this.participants = [];
+                for(let i=0; i<this.config.numParticipants; i++) this.participants.push(new Participant(i+1, i===6));
+                this.renderParticipants();
+            }
+
+            renderParticipants() {
+                const room = this.container.querySelector('.experimental-room');
+                room.innerHTML = '';
+                this.container.className = `simulation-instance room-${this.config.environment}`;
+
+                if (this.config.environment === 'laboratory') {
+                    const table = document.createElement('div'); table.className = 'laboratory-table'; room.appendChild(table);
+                }
+
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.setAttribute('class', 'pressure-map-overlay');
+                room.appendChild(svg);
+                this.pressureSVG = svg;
+
+                const grid = document.createElement('div'); grid.className = 'participants-grid';
+                this.participants.forEach((p, i) => {
+                    const el = p.render(this.participants.length, i);
+                    if (this.config.environment === 'laboratory') {
+                        el.style.position = 'absolute';
+                        el.style.left = `calc(50% + ${el.dataset.x}px - 50px)`;
+                        el.style.top = `calc(50% + ${el.dataset.y}px - 100px)`;
+                    }
+                    grid.appendChild(el);
+                });
+                room.appendChild(grid);
+            }
+
+            async startRound() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                const correctIdx = Math.floor(Math.random() * 3);
+                const base = 100 + Math.random() * 50;
+                const options = [0,1,2].map(i => i === correctIdx ? base : base + (Math.random() > 0.5 ? 30 : -30));
+                this.currentRound = { correct: ['A','B','C'][correctIdx], options, error: ['A','B','C'][(correctIdx+1)%3] };
+
+                const pat = this.container.querySelector('.pattern-line-container');
+                const opt = this.container.querySelector('.options-line-container');
+                pat.innerHTML = `<div class="line" style="height:${base}px"></div>`;
+                opt.innerHTML = options.map((h, i) => `<div class="line-wrapper"><div class="line" id="l-${this.containerId}-${i}" style="height:${h}px"></div><span>${['A','B','C'][i]}</span></div>`).join('');
+
+                let errors = 0;
+                const totalConfederates = this.participants.length - 1;
+
+                for(let i=0; i<this.participants.length; i++) {
+                    const p = this.participants[i];
+                    if (p.isSubject) {
+                        const pressure = (errors / Math.max(1, totalConfederates)) * 100;
+                        p.currentPressure = pressure;
+                        p.currentAnxiety = p.socialAnxiety + (pressure * 0.5);
+                        p.updateUI();
+                        this.updatePressureMap(errors);
+                        const choice = this.mode === 'participant' ? await this.handleUser() : this.calculateDecision(p, errors);
+                        await p.speak(this.config.isPrivate ? "(Privado)" : choice, this.speed);
+                        this.record(choice);
                     } else {
-                        sim.config[key] = value;
-                    }
-                });
+                        let ans;
+                        const isAlly = this.config.hasAlly && i === 0;
 
-                if (document.getElementById(`val-${key}`)) {
-                    document.getElementById(`val-${key}`).textContent = value;
-                }
-            }
-
-            updateSubjectTrait(key, value) {
-                const simulations = [this.sim, window.simulation2];
-                simulations.forEach(sim => {
-                    if (!sim) return;
-                    const subject = sim.participants.find(p => p.isSubject);
-                    if (subject) {
-                        subject[key] = parseInt(value);
-                    }
-                });
-                document.getElementById(`val-${key}`).textContent = value;
-            }
-
-            toggleMode() {
-                this.sim.toggleMode();
-                if (window.simulation2) window.simulation2.toggleMode();
-            }
-
-            toggleComparisonMode() {
-                const layout = document.body;
-                const btn = document.getElementById('btn-comparison-toggle');
-                const sim2Container = document.getElementById('sim-2');
-                const isComparison = layout.classList.toggle('comparison-active');
-
-                if (isComparison) {
-                    btn.textContent = "Modo Comparación: ON";
-                    sim2Container.classList.remove('hidden');
-                    if (!window.simulation2) {
-                        window.simulation2 = new Simulation('sim-2', true);
-                        window.simulation2.init();
-                        window.simulation2.animate();
-                    }
-                    window.simulation2.startRound();
-                } else {
-                    btn.textContent = "Modo Comparación: OFF";
-                    sim2Container.classList.add('hidden');
-                }
-            }
-
-            toggleDidactic() {
-                this.isDidacticOpen = !this.isDidacticOpen;
-                const overlay = document.getElementById('overlay');
-                const didactic = document.getElementById('didactic-content');
-
-                if (this.isDidacticOpen) {
-                    this.renderDidacticContent();
-                    overlay.classList.remove('hidden');
-                    didactic.classList.remove('hidden');
-                } else {
-                    overlay.classList.add('hidden');
-                }
-            }
-
-            renderDidacticContent() {
-                const content = document.getElementById('didactic-content');
-                content.innerHTML = `
-                    <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
-                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                        <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid var(--accent-color); padding-bottom: 1rem;">
-                            <div style="width: 60px; height: 60px; background: var(--accent-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem;">Asch</div>
-                            <div>
-                                <h2 style="margin: 0; color: var(--primary-color);">El Experimento de Conformidad de Solomon Asch</h2>
-                                <p style="color: #7f8c8d; margin: 0;">Fundamentos de la Psicología Social</p>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                            <div>
-                                <h3 style="color: var(--secondary-color); margin-bottom: 0.5rem;">¿Qué es la Conformidad?</h3>
-                                <p>Es la tendencia de los individuos a cambiar sus percepciones, opiniones y comportamientos de manera que sean consistentes con las normas de un grupo.</p>
-
-                                <h3 style="color: var(--secondary-color); margin-top: 1.5rem; margin-bottom: 0.5rem;">Los Tipos de Influencia</h3>
-                                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--warning-color);">
-                                    <p><strong>Influencia Normativa:</strong> Conformarse para evitar el rechazo social (miedo al "qué dirán").</p>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-color); margin-top: 0.5rem;">
-                                    <p><strong>Influencia Informativa:</strong> Conformarse porque creemos que el grupo tiene razón o sabe algo que nosotros no.</p>
-                                </div>
-                            </div>
-
-                            <div style="background: #fff; border: 1px solid #eee; padding: 1.5rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                                <h3 style="color: var(--secondary-color); margin-bottom: 1rem; text-align: center;">Visualización del Experimento</h3>
-                                <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 120px; padding: 10px; border: 1px solid #ddd; margin-bottom: 10px;">
-                                    <div style="width: 10px; height: 80px; background: #333;"></div>
-                                    <div style="width: 10px; height: 60px; background: var(--error-color);"></div>
-                                    <div style="width: 10px; height: 80px; background: var(--success-color);"></div>
-                                    <div style="width: 10px; height: 95px; background: var(--error-color);"></div>
-                                </div>
-                                <div style="display: flex; justify-content: space-around; font-size: 0.7rem; font-weight: bold;">
-                                    <span>PATRÓN</span>
-                                    <span>A</span>
-                                    <span>B (CORRECTO)</span>
-                                    <span>C</span>
-                                </div>
-                                <p style="font-size: 0.8rem; color: #777; margin-top: 1rem; text-align: center; font-style: italic;">
-                                    "Aun cuando la evidencia física es clara, la presión social puede distorsionar nuestra respuesta pública."
-                                </p>
-                            </div>
-                        </div>
-
-                        <div style="background: var(--primary-color); color: white; padding: 1.5rem; border-radius: 12px;">
-                            <h3 style="margin-top: 0; color: var(--accent-color);">Hallazgos Principales</h3>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-                                <div>
-                                    <div style="font-size: 2rem; font-weight: bold;">75%</div>
-                                    <div style="font-size: 0.8rem;">Se conformó al menos una vez</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 2rem; font-weight: bold;">33%</div>
-                                    <div style="font-size: 0.8rem;">Tasa de conformidad promedio</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 2rem; font-weight: bold;">5%</div>
-                                    <div style="font-size: 0.8rem;">Conformidad si hay un ALIADO</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p style="font-size: 0.9rem; color: #7f8c8d; text-align: center;">
-                            Esta simulación utiliza algoritmos probabilísticos basados en estas variables históricas para recrear la dinámica social en tiempo real.
-                        </p>
-                    </div>
-                `;
-            }
-
-            closeOverlays() {
-                this.isDidacticOpen = false;
-                document.getElementById('overlay').classList.add('hidden');
-            }
-
-            setupEventListeners() {
-                // Clicking on participants for details
-                document.getElementById('simulations-wrapper').addEventListener('click', (e) => {
-                    const avatar = e.target.closest('.avatar-container');
-                    if (avatar) {
-                        const id = parseInt(avatar.dataset.participantId);
-                        const simContainer = avatar.closest('.simulation-instance');
-                        const sim = (simContainer.id === 'sim-1') ? simulation1 : window.simulation2;
-
-                        if (sim) {
-                            const p = sim.participants.find(part => part.id === id);
-                            this.showParticipantDetails(p);
+                        if (isAlly) {
+                            ans = this.currentRound.correct;
+                        } else {
+                            switch(this.config.behavior) {
+                                case 'unanimousError': ans = this.currentRound.error; break;
+                                case 'majorityError': ans = (i < totalConfederates * 0.7) ? this.currentRound.error : this.currentRound.correct; break;
+                                case 'allCorrect': ans = this.currentRound.correct; break;
+                                case 'random': ans = ['A','B','C'][Math.floor(Math.random()*3)]; break;
+                                default: ans = this.currentRound.error;
+                            }
                         }
+
+                        const isCorrect = ans === this.currentRound.correct;
+                        if (!isCorrect) errors++;
+                        p.history.push({ round: this.stats.total, choice: ans, isCorrect, wasConformity: false });
+                        await p.speak(ans, this.speed);
                     }
+                }
+                this.isRunning = false;
+                if (this.mode === 'observation') setTimeout(() => this.startRound(), 1500);
+            }
+
+            calculateDecision(p, errors) {
+                if (this.config.isPrivate) return this.currentRound.correct;
+
+                const totalConfederates = this.participants.length - 1;
+                const isUnanimousError = (errors === totalConfederates) && totalConfederates > 0;
+
+                // Base probability from group pressure
+                let prob = (errors / Math.max(1, totalConfederates)) * 0.6;
+
+                // Modifiers: Increase conformity
+                prob += (p.socialAnxiety / 250);
+                prob += (p.needAcceptance / 300);
+
+                // Reducers: Decrease conformity
+                prob -= (p.criticalThinking / 400);
+                prob -= (p.selfEsteem / 500);
+                prob -= (p.perceptionConfidence / 300);
+
+                // Ally Effect: Drastic drop if unanimity is broken
+                if (!isUnanimousError && totalConfederates > 1) prob *= 0.15;
+
+                // Environment Effect
+                if (this.config.environment !== 'laboratory') prob *= 0.7;
+
+                const finalProb = Math.max(0.01, Math.min(0.99, prob));
+                return Math.random() < finalProb ? this.currentRound.error : this.currentRound.correct;
+            }
+
+            async handleUser() {
+                const area = this.container.querySelector('.interaction-area');
+                area.classList.remove('hidden');
+                return new Promise(res => { this.userResolve = (c) => { area.classList.add('hidden'); res(c); } });
+            }
+
+            userSelect(c) { if (this.userResolve) this.userResolve(c); }
+
+            record(choice) {
+                const isCorrect = choice === this.currentRound.correct;
+                const wasConformity = !isCorrect && this.config.hasAlly === false;
+                const subject = this.participants.find(p => p.isSubject);
+                subject.history.push({ round: this.stats.total, choice, isCorrect, wasConformity });
+
+                this.stats.total++;
+                if (isCorrect) this.stats.correct++; else this.stats.conformity++;
+
+                const letterIdx = {'A':0, 'B':1, 'C':2}[choice];
+                const correctIdx = {'A':0, 'B':1, 'C':2}[this.currentRound.correct];
+                this.container.querySelector(`#l-${this.containerId}-${correctIdx}`).classList.add('correct-highlight');
+                if (!isCorrect) this.container.querySelector(`#l-${this.containerId}-${letterIdx}`).classList.add('error-highlight');
+
+                if (window.statsManager) window.statsManager.update();
+            }
+
+            updatePressureMap(errors) {
+                if (!this.pressureSVG || this.config.environment !== 'laboratory' || errors === 0) { this.pressureSVG.innerHTML = ''; return; }
+                this.pressureSVG.innerHTML = '<defs><marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="rgba(255,0,0,0.5)"/></marker></defs>';
+                const sub = this.participants.find(p => p.isSubject).element.getBoundingClientRect();
+                const room = this.container.querySelector('.experimental-room').getBoundingClientRect();
+                this.participants.forEach(p => {
+                    if (p.isSubject || p.history.length > this.stats.total) return;
+                    const r = p.element.getBoundingClientRect();
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute('x1', r.left - room.left + 50); line.setAttribute('y1', r.top - room.top + 50);
+                    line.setAttribute('x2', sub.left - room.left + 50); line.setAttribute('y2', sub.top - room.top + 50);
+                    line.setAttribute('stroke', 'rgba(255,0,0,0.2)'); line.setAttribute('stroke-width', '2'); line.setAttribute('marker-end', 'url(#arrow)');
+                    this.pressureSVG.appendChild(line);
                 });
             }
 
-            showParticipantDetails(p) {
-                const overlay = document.getElementById('overlay');
-                const content = document.getElementById('didactic-content');
+            animate() {
+                const sub = this.participants.find(p => p.isSubject);
+                if (sub && sub.element) {
+                    sub.element.querySelector('.avatar').style.setProperty('--breath', 1 + Math.sin(Date.now()/500) * 0.03);
+                }
+                requestAnimationFrame(() => this.animate());
+            }
+        }
 
-                content.innerHTML = `
-                    <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
-                    <div style="display: flex; gap: 2rem; align-items: flex-start; flex-direction: column;">
-                        <div style="display: flex; gap: 2rem; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 1.5rem;">
-                            <div class="avatar ${p.isSubject ? 'subject' : 'confederate'}" style="width: 120px; height: 120px; flex-shrink: 0;">
-                                <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
-                            </div>
-                            <div style="flex-grow: 1;">
-                                <h2 style="margin-top: 0;">${p.name}</h2>
-                                <p style="color: #636e72; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 1.5rem;">
-                                    Rol: ${p.isSubject ? '<span style="color:var(--accent-color)">Sujeto Experimental</span>' : 'Cómplice del Experimento'}
-                                </p>
+        class UIManager {
+            constructor(sim) { this.sim = sim; this.isComp = false; }
+            init() { this.sim.init(); this.sim.animate(); this.sim.startRound(); }
+            updateConfig(k, v) {
+                [this.sim, window.simulation2].forEach(s => {
+                    if (!s) return;
+                    if (k === 'speed') {
+                        s.speed = parseInt(v);
+                        document.getElementById('val-speed').textContent = v;
+                    }
+                    else if (k === 'numParticipants') {
+                        s.config.numParticipants = parseInt(v);
+                        document.getElementById('val-numParticipants').textContent = v;
+                        s.init();
+                    }
+                    else if (k === 'hasAlly') {
+                        if (s === window.simulation2 || !window.simulation2) {
+                            s.config.hasAlly = v;
+                            const label = document.querySelector(`#${s.containerId} .instance-label`);
+                            if (label) label.textContent = `Simulación ${s === simulation1 ? 'A' : 'B'} (${v ? 'Con Aliado' : 'Sin Aliado'})`;
+                        }
+                    } else {
+                        s.config[k] = v;
+                        if (k === 'environment') s.renderParticipants();
+                    }
+                });
+            }
+            updateSubjectTrait(k, v) {
+                [this.sim, window.simulation2].forEach(s => { if(s) { const p = s.participants.find(part => part.isSubject); if(p) p[k] = parseInt(v); } });
+                document.getElementById(`val-${k}`).textContent = v;
+            }
+            toggleComparisonMode() {
+                this.isComp = document.body.classList.toggle('comparison-active');
+                document.getElementById('btn-comparison-toggle').textContent = `Modo Comparación: ${this.isComp ? 'ON' : 'OFF'}`;
+                document.getElementById('sim-2').classList.toggle('hidden', !this.isComp);
+                if (this.isComp && !window.simulation2) {
+                    window.simulation2 = new Simulation('sim-2', true); window.simulation2.init();
+                    window.simulation2.animate(); window.simulation2.startRound();
+                }
+            }
+            toggleMode() {
+                const mode = this.sim.mode === 'observation' ? 'participant' : 'observation';
+                [this.sim, window.simulation2].forEach(s => { if(s) s.mode = mode; });
+                document.getElementById('btn-mode-toggle').textContent = mode === 'observation' ? 'Modo Participante' : 'Modo Observación';
+            }
+            toggleDidactic() {
+                const body = document.getElementById('modal-body');
+                body.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid var(--accent-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 50px; height: 50px; background: var(--accent-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.5rem; font-weight: bold;">Asch</div>
+                        <h2 style="margin: 0;">El Experimento de Conformidad</h2>
+                    </div>
+                    <p>En 1951, el psicólogo <strong>Solomon Asch</strong> realizó una serie de experimentos que se convirtieron en pilares de la psicología social. El objetivo era medir hasta qué punto la presión de un grupo puede influir en el juicio de un individuo.</p>
 
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                    ${this.renderTraitDetail('Autoestima', p.selfEsteem, 'var(--accent-color)')}
-                                    ${this.renderTraitDetail('Pensamiento Crítico', p.criticalThinking, 'var(--success-color)')}
-                                    ${this.renderTraitDetail('Ansiedad Social', p.socialAnxiety, 'var(--error-color)')}
-                                    ${this.renderTraitDetail('Necesidad de Aceptación', p.needForAcceptance, 'var(--warning-color)')}
-                                </div>
-                            </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0;">
+                        <div style="background: #f0f7ff; padding: 1.2rem; border-radius: 12px; border-left: 5px solid var(--accent-color);">
+                            <h3 style="margin-top:0; font-size: 1rem;">Influencia Normativa</h3>
+                            <p style="font-size: 0.85rem; margin-bottom: 0;">Ocurre cuando el sujeto se conforma para ser aceptado por el grupo y evitar el ridículo o el aislamiento social, aunque sepa que la respuesta es incorrecta.</p>
                         </div>
-
-                        <div style="width: 100%; margin-top: 1rem;">
-                            <h3>Historial de Decisiones</h3>
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                                ${p.history.length === 0 ? '<p style="color:#999; font-style:italic;">No hay datos registrados aún.</p>' :
-                                    p.history.map(h => `
-                                        <div style="padding: 5px 10px; border-radius: 4px; background: ${h.isCorrect ? 'var(--success-color)' : (h.wasConformity ? 'var(--error-color)' : '#95a5a6')}; color: white; font-size: 0.8rem; min-width: 40px; text-align: center;">
-                                            R${h.round+1}: ${h.choice}
-                                        </div>
-                                    `).join('')
-                                }
-                            </div>
-                            ${p.isSubject ? `
-                                <div style="margin-top: 1rem; padding: 1rem; background: #e1f5fe; border-radius: 8px; font-size: 0.9rem;">
-                                    <strong>Resumen de Presión:</strong> El sujeto ha enfrentado una presión promedio de ${Math.round(p.currentPressure)}% en la ronda actual.
-                                    Su nivel de ansiedad ha variado según la unanimidad de la mayoría.
-                                </div>
-                            ` : ''}
+                        <div style="background: #f0fff4; padding: 1.2rem; border-radius: 12px; border-left: 5px solid var(--success-color);">
+                            <h3 style="margin-top:0; font-size: 1rem;">Influencia Informativa</h3>
+                            <p style="font-size: 0.85rem; margin-bottom: 0;">Ocurre cuando el sujeto duda de su propia percepción y asume que el grupo tiene una información o capacidad de juicio superior.</p>
                         </div>
                     </div>
+
+                    <h3 style="font-size: 1.1rem; color: var(--secondary-color);">Hallazgos Clave de Asch:</h3>
+                    <ul style="padding-left: 1.5rem; line-height: 1.8;">
+                        <li><strong>Unanimidad:</strong> Si el grupo es unánime en el error, la tasa de conformidad promedio es del 33%.</li>
+                        <li><strong>Efecto del Aliado:</strong> Si un solo cómplice da la respuesta correcta, la conformidad cae al 5%.</li>
+                        <li><strong>Respuesta Privada:</strong> Si el sujeto escribe su respuesta en lugar de decirla en voz alta, la conformidad desaparece casi por completo.</li>
+                    </ul>
+
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--primary-color); color: white; border-radius: 8px; text-align: center;">
+                        <p style="margin: 0; font-style: italic;">"La conformidad es el proceso por el cual los miembros de un grupo social cambian sus pensamientos, decisiones y comportamientos para encajar con la opinión de la mayoría."</p>
+                    </div>
                 `;
-
-                overlay.classList.remove('hidden');
-                content.classList.remove('hidden');
+                document.getElementById('overlay').classList.remove('hidden');
             }
-
             generateReport() {
-                const s1 = simulation1.stats;
+                const s1 = this.sim.stats;
                 const s2 = window.simulation2 ? window.simulation2.stats : null;
+                const body = document.getElementById('modal-body');
 
-                const reportContent = `
-                    <button class="close-btn" onclick="ui.closeOverlays()">✕</button>
-                    <div style="padding: 1rem;">
-                        <h2 style="color: var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 10px;">Informe de Resultados Experimentales</h2>
-                        <p style="font-size: 0.9rem; color: #7f8c8d;">Laboratorio de Psicología Social - Simulación Asch</p>
+                const getAnalysis = (s) => {
+                    if (!s || s.total === 0) return "Datos insuficientes.";
+                    const rate = (s.conformity / s.total) * 100;
+                    if (rate > 33) return "<strong>Alta Conformidad:</strong> El sujeto muestra una dependencia excesiva del grupo, superando la media de Asch (33%). Esto sugiere una fuerte influencia normativa.";
+                    if (rate > 10) return "<strong>Conformidad Moderada:</strong> Se observa resistencia pero con episodios de vulnerabilidad ante la presión unánime.";
+                    return "<strong>Independencia Significativa:</strong> El sujeto mantiene su juicio a pesar de la presión social masiva. Refleja alta confianza perceptiva.";
+                };
 
-                        <div style="display: grid; grid-template-columns: ${s2 ? '1fr 1fr' : '1fr'}; gap: 2rem; margin-top: 2rem;">
-                            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
-                                <h3 style="margin-top: 0; font-size: 1rem;">Condición A (Base)</h3>
-                                <ul style="list-style: none; padding: 0; margin-top: 1rem;">
-                                    <li style="margin-bottom: 0.5rem;"><strong>Ensayos:</strong> ${s1.totalRounds}</li>
-                                    <li style="margin-bottom: 0.5rem;"><strong>Tasa Conformidad:</strong> ${s1.totalRounds > 0 ? Math.round((s1.conformityCount/s1.totalRounds)*100) : 0}%</li>
-                                    <li style="margin-bottom: 0.5rem;"><strong>Tasa Acierto:</strong> ${s1.totalRounds > 0 ? Math.round((s1.correctCount/s1.totalRounds)*100) : 0}%</li>
-                                </ul>
-                            </div>
-                            ${s2 ? `
-                                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
-                                    <h3 style="margin-top: 0; font-size: 1rem;">Condición B (Comparación)</h3>
-                                    <ul style="list-style: none; padding: 0; margin-top: 1rem;">
-                                        <li style="margin-bottom: 0.5rem;"><strong>Ensayos:</strong> ${s2.totalRounds}</li>
-                                        <li style="margin-bottom: 0.5rem;"><strong>Tasa Conformidad:</strong> ${s2.totalRounds > 0 ? Math.round((s2.conformityCount/s2.totalRounds)*100) : 0}%</li>
-                                        <li style="margin-bottom: 0.5rem;"><strong>Tasa Acierto:</strong> ${s2.totalRounds > 0 ? Math.round((s2.correctCount/s2.totalRounds)*100) : 0}%</li>
-                                    </ul>
+                body.innerHTML = `
+                <div style="border-left: 8px solid var(--primary-color); padding-left: 1.5rem; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; margin: 0;">Informe Analítico de Psicología Social</h2>
+                    <p style="color: #64748b; margin: 0.5rem 0 0 0;">Generado proceduralmente en base a la sesión de simulación actual.</p>
+                </div>
+
+                <div style="display:grid; grid-template-columns: ${s2?'1fr 1fr':'1fr'}; gap: 2rem;">
+                    <div style="background:#f1f5f9; padding:2rem; border-radius:16px; border: 1px solid #e2e8f0;">
+                        <h3 style="color: var(--accent-color); margin-top: 0;">Simbiosis de Datos: Grupo A</h3>
+                        <div style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0;">${s1.total?Math.round(s1.conformity/s1.total*100):0}<span style="font-size: 1rem; color: #64748b; font-weight: 400;">% Tasa de Conformidad</span></div>
+                        <p style="font-size: 0.95rem; line-height: 1.6; color: #334155;">${getAnalysis(s1)}</p>
+                    </div>
+                    ${s2 ? `
+                    <div style="background:#f1f5f9; padding:2rem; border-radius:16px; border: 1px solid #e2e8f0;">
+                        <h3 style="color: var(--success-color); margin-top: 0;">Simbiosis de Datos: Grupo B</h3>
+                        <div style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0;">${s2.total?Math.round(s2.conformity/s2.total*100):0}<span style="font-size: 1rem; color: #64748b; font-weight: 400;">% Tasa de Conformidad</span></div>
+                        <p style="font-size: 0.95rem; line-height: 1.6; color: #334155;">${getAnalysis(s2)}</p>
+                    </div>` : ''}
+                </div>
+
+                <div style="margin-top: 2rem; padding: 2rem; background: #0f172a; color: #f8fafc; border-radius: 16px;">
+                    <h3 style="margin-top: 0; color: #60a5fa;">Comparativa Histórica (Asch 1951)</h3>
+                    <div style="display: flex; align-items: center; gap: 2rem;">
+                        <div style="flex: 1;">
+                            <p style="font-size: 0.9rem; opacity: 0.8;">En los estudios originales de Solomon Asch, el 75% de los participantes se conformaron al menos una vez. La tasa de conformidad neta fue del 33% en condiciones de unanimidad del grupo.</p>
+                        </div>
+                        <div style="width: 150px; text-align: center; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 2rem;">
+                            <div style="font-size: 2rem; font-weight: 800;">33%</div>
+                            <div style="font-size: 0.7rem; text-transform: uppercase;">Meta-Análisis Asch</div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                document.getElementById('overlay').classList.remove('hidden');
+            }
+            showParticipantDetails(p) {
+                const body = document.getElementById('modal-body');
+                body.innerHTML = `
+                    <div style="display: flex; gap: 2rem; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 80px; height: 80px; background: ${p.isSubject ? 'var(--accent-color)' : '#95a5a6'}; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; font-weight: bold;">
+                            ${p.id}
+                        </div>
+                        <div>
+                            <h2 style="margin: 0;">${p.name}</h2>
+                            <p style="color: var(--accent-color); font-weight: bold; margin: 0;">${p.isSubject ? 'SUJETO EXPERIMENTAL' : 'CÓMPLICE (ACTOR)'}</p>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                            <strong>Rasgos Psicológicos:</strong>
+                            <ul style="font-size: 0.9rem; margin-top: 0.5rem; list-style: none; padding: 0;">
+                                <li>Autoestima: ${Math.round(p.selfEsteem)}%</li>
+                                <li>Pensamiento Crítico: ${Math.round(p.criticalThinking)}%</li>
+                                <li>Ansiedad Social: ${Math.round(p.socialAnxiety)}%</li>
+                            </ul>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                            <strong>Estado Actual:</strong>
+                            <ul style="font-size: 0.9rem; margin-top: 0.5rem; list-style: none; padding: 0;">
+                                <li>Presión Percibida: ${Math.round(p.currentPressure)}%</li>
+                                <li>Ansiedad Actual: ${Math.round(p.currentAnxiety)}%</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <strong>Historial de Decisiones (últimas 5):</strong>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                            ${p.history.length ? p.history.slice(-5).map(h => `
+                                <div style="padding: 6px 12px; background: ${h.isCorrect ? 'var(--success-color)' : 'var(--error-color)'}; color: white; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">
+                                    R${h.round+1}: ${h.choice}
                                 </div>
-                            ` : ''}
-                        </div>
-
-                        <div style="margin-top: 2rem; background: #e1f5fe; padding: 1.5rem; border-radius: 12px;">
-                            <h3 style="margin-top: 0;">Análisis Comparativo con Solomon Asch (1951)</h3>
-                            <p style="margin-top: 1rem;">En el experimento original, la tasa de conformidad promedio fue del <strong>33%</strong>. </p>
-                            <p style="margin-top: 0.5rem;">
-                                ${s1.totalRounds > 0 ? (
-                                    (s1.conformityCount/s1.totalRounds*100 > 35) ?
-                                    "Los resultados actuales muestran una tendencia a la conformidad **superior** a la media histórica, sugiriendo una alta susceptibilidad a la influencia normativa en este sujeto." :
-                                    (s1.conformityCount/s1.totalRounds*100 < 20) ?
-                                    "La tasa de conformidad es notablemente **inferior** a la de Asch, indicando un alto grado de independencia perceptiva o factores protectores (como alto pensamiento crítico)." :
-                                    "La simulación se alinea estrechamente con los hallazgos clásicos de Asch."
-                                ) : "Inicie la simulación para obtener un análisis detallado."}
-                            </p>
-                        </div>
-
-                        <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.8rem; color: #999;">Generado automáticamente por AschLab v2.0</span>
-                            <button onclick="window.print()" style="background: var(--secondary-color);">Imprimir Informe</button>
+                            `).join('') : '<span style="color:#999; font-style: italic;">Sin datos registrados aún...</span>'}
                         </div>
                     </div>
                 `;
-
-                const overlay = document.getElementById('overlay');
-                const content = document.getElementById('didactic-content');
-                content.innerHTML = reportContent;
-                overlay.classList.remove('hidden');
-                content.classList.remove('hidden');
+                document.getElementById('overlay').classList.remove('hidden');
             }
-
-            renderTraitDetail(label, value, color) {
-                return `
-                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span style="font-size: 0.8rem; font-weight: 600; color: #7f8c8d;">${label}</span>
-                            <span style="font-weight: bold; color: ${color};">${Math.round(value)}%</span>
-                        </div>
-                        <div style="height: 6px; background: #eee; border-radius: 3px; overflow: hidden;">
-                            <div style="height: 100%; width: ${value}%; background: ${color}; transition: width 1s ease;"></div>
-                        </div>
-                    </div>
-                `;
-            }
+            closeOverlays() { document.getElementById('overlay').classList.add('hidden'); }
         }
 
         class StatsManager {
-            constructor(simulation) {
-                this.sim = simulation;
-                this.conformityHistory = [];
-            }
-
-            init() {
-                this.renderStatsStructure();
-                this.update();
-            }
-
-            drawHistogram() {
-                const canvas = document.getElementById('histogram-chart');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                const w = canvas.width;
-                const h = canvas.height;
-
-                const s1 = this.sim.stats;
-                const s2 = window.simulation2 ? window.simulation2.stats : null;
-
-                ctx.clearRect(0, 0, w, h);
-
-                const drawBars = (stats, offsetX, labelPrefix) => {
-                    const total = stats.totalRounds || 1;
-                    const correctH = (stats.correctCount / total) * (h - 30);
-                    const conformityH = (stats.conformityCount / total) * (h - 30);
-
-                    const barW = s2 ? 30 : 60;
-
-                    // Correct bar
-                    ctx.fillStyle = 'var(--success-color)';
-                    ctx.fillRect(offsetX, h - correctH, barW, correctH);
-
-                    // Conformity bar
-                    ctx.fillStyle = 'var(--error-color)';
-                    ctx.fillRect(offsetX + barW + 5, h - conformityH, barW, conformityH);
-
-                    // Labels
-                    ctx.fillStyle = '#333';
-                    ctx.font = 'bold 10px Arial';
-                    ctx.fillText(`${labelPrefix}`, offsetX, h - 5);
-                };
-
-                drawBars(s1, 20, 'Sim A');
-                if (s2) {
-                    drawBars(s2, w / 2 + 10, 'Sim B');
-                }
-            }
-
-            renderStatsStructure() {
-                const panel = document.getElementById('stats-content');
-                panel.innerHTML = `
-                    <div class="stat-item">
-                        <div class="stat-label">Ensayos Totales</div>
-                        <div class="stat-value" id="stat-rounds">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Tasa de Conformidad</div>
-                        <div class="stat-value" id="stat-conformity">0%</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Tasa de Acierto</div>
-                        <div class="stat-value" id="stat-accuracy">0%</div>
-                    </div>
-                    <canvas id="conformity-chart"></canvas>
-                    <div class="stat-label" style="text-align:center; margin-top:5px;">Evolución de Conformidad</div>
-
-                    <canvas id="histogram-chart" style="height: 100px !important;"></canvas>
-                    <div class="stat-label" style="text-align:center; margin-top:5px;">Distribución de Decisiones</div>
-
-                    <div style="margin-top: 1.5rem; font-size: 0.8rem; background: #eee; padding: 10px; border-radius: 4px;">
-                        <strong>Referencia Asch:</strong><br>
-                        Promedio Conformidad: 33%<br>
-                        Al menos una vez: 75%
-                    </div>
-                    <button class="secondary" onclick="ui.generateReport()" style="width:100%; margin-top: 1rem; background: var(--primary-color);">Generar Informe Científico</button>
-                `;
-            }
-
+            constructor(sim) { this.sim = sim; this.history = []; }
             update() {
-                const s1 = this.sim.stats;
-                const s2 = window.simulation2 ? window.simulation2.stats : null;
-
-                const rounds = s2 ? Math.max(s1.totalRounds, s2.totalRounds) : s1.totalRounds;
-                const conformityRate1 = s1.totalRounds > 0 ? Math.round((s1.conformityCount / s1.totalRounds) * 100) : 0;
-                const accuracyRate1 = s1.totalRounds > 0 ? Math.round((s1.correctCount / s1.totalRounds) * 100) : 0;
-
-                const roundElem = document.getElementById('stat-rounds');
-                const confElem = document.getElementById('stat-conformity');
-                const accElem = document.getElementById('stat-accuracy');
-
-                if (roundElem) roundElem.textContent = rounds;
-
-                if (s2) {
-                    const conformityRate2 = s2.totalRounds > 0 ? Math.round((s2.conformityCount / s2.totalRounds) * 100) : 0;
-                    const accuracyRate2 = s2.totalRounds > 0 ? Math.round((s2.correctCount / s2.totalRounds) * 100) : 0;
-                    if (confElem) confElem.innerHTML = `A: ${conformityRate1}% | B: ${conformityRate2}%`;
-                    if (accElem) accElem.innerHTML = `A: ${accuracyRate1}% | B: ${accuracyRate2}%`;
-                } else {
-                    if (confElem) confElem.textContent = `${conformityRate1}%`;
-                    if (accElem) accElem.textContent = `${accuracyRate1}%`;
-                }
-
-                if (s1.totalRounds > 0 || (s2 && s2.totalRounds > 0)) {
-                    this.conformityHistory.push({
-                        a: conformityRate1,
-                        b: s2 ? (s2.totalRounds > 0 ? Math.round((s2.conformityCount / s2.totalRounds) * 100) : 0) : null
-                    });
-
-                    if (this.conformityHistory.length > 50) this.conformityHistory.shift();
-
-                    this.drawChart();
-                    this.drawHistogram();
-                }
+                const s = this.sim.stats;
+                document.getElementById('stat-rounds').textContent = s.total;
+                document.getElementById('stat-conformity').textContent = `${s.total?Math.round(s.conformity/s.total*100):0}%`;
+                this.history.push(s.total ? (s.conformity/s.total*100) : 0);
+                if (this.history.length > 50) this.history.shift();
+                this.draw();
             }
+            draw() {
+                const canvas = document.getElementById('conformity-chart'); if(!canvas) return;
+                const ctx = canvas.getContext('2d'); const w = canvas.width, h = canvas.height;
 
-            reset() {
-                const sims = [this.sim, window.simulation2].filter(s => !!s);
-                sims.forEach(sim => {
-                    sim.stats = { totalRounds: 0, conformityCount: 0, correctCount: 0, totalPressure: 0 };
-                    sim.rounds = 0;
-                });
-                this.conformityHistory = [];
-                this.update();
-            }
+                // Conformity Trend Curve
+                ctx.clearRect(0,0,w,h);
+                ctx.setLineDash([5, 5]); ctx.strokeStyle = '#cbd5e1'; ctx.beginPath(); ctx.moveTo(0, h*0.66); ctx.lineTo(w, h*0.66); ctx.stroke(); ctx.setLineDash([]); // Asch Baseline (33%)
 
-            drawChart() {
-                const canvas = document.getElementById('conformity-chart');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                const w = canvas.width;
-                const h = canvas.height;
-
-                ctx.clearRect(0, 0, w, h);
-
-                // Draw grid
-                ctx.strokeStyle = '#eee';
-                ctx.beginPath();
-                for(let i=0; i<=4; i++) {
-                    const y = h - (i * h / 4);
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(w, y);
-                }
+                ctx.strokeStyle = 'var(--accent-color)'; ctx.lineWidth = 3; ctx.beginPath();
+                this.history.forEach((v, i) => { const x = (i/49)*w, y = h - (v/100)*h; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
                 ctx.stroke();
 
-                // Draw history line
-                if (this.conformityHistory.length < 2) return;
+                // Histogram
+                const hist = document.getElementById('histogram-chart').getContext('2d');
+                const hw = 300, hh = 150;
+                hist.clearRect(0,0,hw,hh);
+                const total = Math.max(1, this.sim.stats.total);
+                const corrH = (this.sim.stats.correct/total) * (hh-20);
+                const confH = (this.sim.stats.conformity/total) * (hh-20);
 
-                ctx.strokeStyle = 'var(--accent-color)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-
-                const step = w / (this.conformityHistory.length - 1);
-
-                // Line A
-                ctx.strokeStyle = 'var(--accent-color)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                this.conformityHistory.forEach((val, i) => {
-                    const x = i * step;
-                    const y = h - (val.a * h / 100);
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                });
-                ctx.stroke();
-
-                // Line B
-                const hasB = this.conformityHistory.some(val => val.b !== null);
-                if (hasB) {
-                    ctx.strokeStyle = 'var(--success-color)';
-                    ctx.beginPath();
-                    let started = false;
-                    this.conformityHistory.forEach((val, i) => {
-                        if (val.b === null) return;
-                        const x = i * step;
-                        const y = h - (val.b * h / 100);
-                        if (!started) {
-                            ctx.moveTo(x, y);
-                            started = true;
-                        } else {
-                            ctx.lineTo(x, y);
-                        }
-                    });
-                    ctx.stroke();
-                }
+                hist.fillStyle = 'var(--success-color)'; hist.fillRect(60, hh - corrH, 40, corrH);
+                hist.fillStyle = 'var(--error-color)'; hist.fillRect(200, hh - confH, 40, confH);
+                hist.fillStyle = '#64748b'; hist.font = '10px Arial'; hist.fillText('ACIERTO', 60, hh-5); hist.fillText('CONFORM.', 195, hh-5);
             }
         }
 
-        // Global instances
         let simulation1, ui, statsManager;
-
         window.onload = () => {
             simulation1 = new Simulation('sim-1', false);
             statsManager = new StatsManager(simulation1);
             window.statsManager = statsManager;
             ui = new UIManager(simulation1);
             window.ui = ui;
-
-            simulation1.init();
-            statsManager.init();
             ui.init();
+
+            // Click listener for participant details
+            document.getElementById('simulations-wrapper').addEventListener('click', (e) => {
+                const container = e.target.closest('.avatar-container');
+                if (container) {
+                    const id = parseInt(container.dataset.participantId);
+                    const simId = container.closest('.simulation-instance').id;
+                    const sim = simId === 'sim-1' ? simulation1 : window.simulation2;
+                    if (sim) {
+                        const p = sim.participants.find(part => part.id === id);
+                        if (p) ui.showParticipantDetails(p);
+                    }
+                }
+            });
         };
     </script>
 </body>
