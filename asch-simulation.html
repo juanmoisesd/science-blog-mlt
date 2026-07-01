@@ -680,19 +680,29 @@
             </section>
 
             <aside id="stats-panel">
-                <h2>Resultados</h2>
+                <h2>Resultados <span id="comparison-stats-badge" class="hidden" style="font-size: 0.6rem; background: var(--accent-color); color: white; padding: 2px 6px; border-radius: 4px; vertical-align: middle;">A vs B</span></h2>
                 <div id="stats-content">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                        <div class="stat-item" style="padding: 1rem;"><div class="stat-label" style="font-size: 0.6rem;">Ensayos</div><div class="stat-value" id="stat-rounds" style="font-size: 1.5rem;">0</div></div>
-                        <div class="stat-item" style="padding: 1rem;"><div class="stat-label" style="font-size: 0.6rem;">Conformidad</div><div class="stat-value" id="stat-conformity" style="font-size: 1.5rem;">0%</div></div>
+                        <div class="stat-item" style="padding: 1rem;">
+                            <div class="stat-label" style="font-size: 0.6rem;">Ensayos</div>
+                            <div class="stat-value" style="font-size: 1.5rem;"><span id="stat-rounds">0</span><span class="comp-val hidden" id="stat-rounds-b"> / 0</span></div>
+                        </div>
+                        <div class="stat-item" style="padding: 1rem;">
+                            <div class="stat-label" style="font-size: 0.6rem;">Conformidad</div>
+                            <div class="stat-value" style="font-size: 1.5rem;"><span id="stat-conformity">0%</span><span class="comp-val hidden" id="stat-conformity-b" style="color:var(--success-color)"> / 0%</span></div>
+                        </div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Latencia de Respuesta</div>
-                        <div class="stat-value" id="stat-latency">0<span style="font-size: 0.8rem; font-weight: 400; margin-left: 4px;">ms</span></div>
+                        <div class="stat-label">Latencia de Respuesta (ms)</div>
+                        <div class="stat-value"><span id="stat-latency">0</span><span class="comp-val hidden" id="stat-latency-b" style="color:var(--success-color)"> / 0</span></div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Presión Grupal Media</div>
-                        <div class="stat-value" id="stat-avg-pressure">0<span style="font-size: 0.8rem; font-weight: 400; margin-left: 4px;">%</span></div>
+                        <div class="stat-label">Presión Grupal Media (%)</div>
+                        <div class="stat-value"><span id="stat-avg-pressure">0</span><span class="comp-val hidden" id="stat-avg-pressure-b" style="color:var(--success-color)"> / 0</span></div>
+                    </div>
+                    <div id="chart-legend" class="hidden" style="display:flex; justify-content:center; gap:1rem; font-size:0.7rem; margin-bottom:0.5rem; font-weight:bold;">
+                        <span style="color:var(--accent-color)">● Sim A</span>
+                        <span style="color:var(--success-color)">● Sim B</span>
                     </div>
                     <canvas id="conformity-chart"></canvas>
                     <canvas id="histogram-chart" style="height: 100px !important;"></canvas>
@@ -856,20 +866,29 @@
                 const b = this.element.querySelector('.bubble');
                 const a = this.element.querySelector('.avatar');
 
+                // Human-like Latency: Confederates often pause to "think" or show hesitation
+                // especially if they are the first to speak or if there is conflict.
+                const hesitationMod = (this.currentPressure / 100) * 500;
+                const randomDelay = Math.random() * 400;
+                const thinkingTime = (duration * 0.4) + hesitationMod + randomDelay;
+
                 // Thinking phase
                 a.classList.add('thinking');
-                await new Promise(r => setTimeout(r, duration * 0.4));
+                await new Promise(r => setTimeout(r, thinkingTime));
                 a.classList.remove('thinking');
 
                 // Speaking phase
                 b.textContent = text;
                 b.style.display = 'block';
                 a.classList.add('speaking');
-                await new Promise(r => setTimeout(res => {
+
+                // Variable speech duration (short for letters)
+                const speechTime = duration * 0.8;
+                await new Promise(r => setTimeout(() => {
                     b.style.display = 'none';
                     a.classList.remove('speaking');
                     r();
-                }, duration));
+                }, speechTime));
             }
         }
 
@@ -1123,7 +1142,23 @@
 
             animate() {
                 const sub = this.participants.find(p => p.isSubject);
-                if (sub && sub.element) sub.element.querySelector('.avatar').style.setProperty('--breath', 1 + Math.sin(Date.now()/500) * 0.03);
+                if (sub && sub.element) {
+                    const room = this.container.querySelector('.experimental-room');
+
+                    // Breathing animation
+                    sub.element.querySelector('.avatar').style.setProperty('--breath', 1 + Math.sin(Date.now()/500) * 0.03);
+
+                    // Atmospheric Stress: Subtle room-wide pulsing based on subject pressure
+                    if (sub.currentPressure > 30) {
+                        const intensity = (sub.currentPressure - 30) / 70;
+                        const pulse = Math.sin(Date.now() / 300) * 0.05 * intensity;
+                        room.style.backgroundColor = `rgba(239, 68, 68, ${0.02 * intensity + pulse})`;
+                        room.style.boxShadow = `inset 0 0 ${20 + intensity * 60}px rgba(239, 68, 68, ${0.1 * intensity})`;
+                    } else {
+                        room.style.backgroundColor = '';
+                        room.style.boxShadow = '';
+                    }
+                }
                 requestAnimationFrame(() => this.animate());
             }
         }
@@ -1153,7 +1188,21 @@
                 this.isComp = document.body.classList.toggle('comparison-active');
                 document.getElementById('btn-comparison-toggle').textContent = `Modo Comparación: ${this.isComp ? 'ON' : 'OFF'}`;
                 document.getElementById('sim-2').classList.toggle('hidden', !this.isComp);
-                if (this.isComp && !window.simulation2) { window.simulation2 = new Simulation('sim-2', true); window.simulation2.init(); window.simulation2.animate(); window.simulation2.startRound(); }
+
+                // Toggle stats visibility
+                document.getElementById('comparison-stats-badge').classList.toggle('hidden', !this.isComp);
+                document.getElementById('chart-legend').classList.toggle('hidden', !this.isComp);
+                document.querySelectorAll('.comp-val').forEach(el => el.classList.toggle('hidden', !this.isComp));
+
+                if (this.isComp && !window.simulation2) {
+                    window.simulation2 = new Simulation('sim-2', true);
+                    window.simulation2.init();
+                    window.simulation2.animate();
+                    window.simulation2.startRound();
+                }
+
+                // Update stats immediately to reflect toggle
+                if (window.statsManager) window.statsManager.update();
             }
             toggleMode() {
                 const mode = this.sim.mode === 'observation' ? 'participant' : 'observation';
@@ -1186,6 +1235,10 @@
                         <div style="text-align:center; padding:1rem;">🤝<br><h4>El Aliado Disidente</h4><p style="font-size: 0.75rem;">Reduce la conformidad del 33% al 5%.</p></div>
                         <div style="text-align:center; padding:1rem;">📝<br><h4>Privacidad</h4><p style="font-size: 0.75rem;">Elimina casi toda la conformidad normativa.</p></div>
                     </div>
+                    <div style="background: #1e293b; color: white; padding: 1.5rem; border-radius: 12px; margin-top: 1rem;">
+                        <h4 style="margin-top:0; color: #38bdf8;">Redes Sociales y Polarización</h4>
+                        <p style="font-size: 0.85rem; line-height: 1.6; margin:0;">El "like" actúa hoy como la presión grupal de Asch a escala global. El miedo al aislamiento digital fomenta el <strong>pensamiento grupal</strong> y la <strong>polarización</strong>, donde nos conformamos con la opinión de nuestra burbuja informativa para evitar el rechazo social.</p>
+                    </div>
                 </div>`;
                 document.getElementById('overlay').classList.remove('hidden');
             }
@@ -1209,48 +1262,164 @@
             }
             showParticipantDetails(p) {
                 const body = document.getElementById('modal-body');
-                body.innerHTML = `<h2>${p.name}</h2><p>${p.isSubject ? 'SUJETO EXPERIMENTAL' : 'CÓMPLICE'}</p><p>Autoestima: ${Math.round(p.selfEsteem)}% | Pensamiento Crítico: ${Math.round(p.criticalThinking)}%</p>`;
+                let extra = "";
+                if (p.isSubject && p.lastDecisionProb !== undefined) {
+                    const prob = Math.round(p.lastDecisionProb * 100);
+                    const traitFactor = Math.round((50 - p.selfEsteem/2 - p.criticalThinking/2 + p.socialAnxiety/4) / 1.5);
+                    const pressureFactor = Math.round(p.currentPressure);
+
+                    extra = `
+                    <div style="margin-top: 1.5rem; padding: 1.5rem; background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--primary-color);">Análisis de Probabilidad (Última Decisión)</h3>
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="flex-grow: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; display: flex;">
+                                <div style="width: ${prob}%; background: var(--error-color);"></div>
+                            </div>
+                            <div style="font-weight: 800; color: var(--error-color);">${prob}% Conf.</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.8rem;">
+                            <div style="background: white; padding: 0.75rem; border-radius: 8px;">
+                                <div style="color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 0.65rem;">Peso de Rasgos</div>
+                                <div style="font-size: 1.1rem; font-weight: 800;">${traitFactor}%</div>
+                            </div>
+                            <div style="background: white; padding: 0.75rem; border-radius: 8px;">
+                                <div style="color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 0.65rem;">Presión de Grupo</div>
+                                <div style="font-size: 1.1rem; font-weight: 800;">${pressureFactor}%</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.75rem; color: #64748b; margin-top: 1rem; font-style: italic;">La probabilidad final se calcula mediante un modelo multivariante que integra la resistencia cognitiva individual frente a la influencia normativa del grupo.</p>
+                    </div>`;
+                }
+
+                body.innerHTML = `
+                <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2rem;">
+                    <div style="width: 80px; height: 80px; background: ${p.isSubject ? 'var(--accent-color)' : 'var(--secondary-color)'}; border-radius: 20px; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; font-weight: 800; box-shadow: var(--shadow-md);">
+                        ${p.id}
+                    </div>
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.8rem; letter-spacing: -0.02em;">${p.name}</h2>
+                        <p style="color: var(--accent-color); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; margin: 0;">${p.isSubject ? 'Sujeto Experimental' : 'Cómplice (Confederado)'}</p>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 0.7rem; font-weight: bold; color: #64748b; margin-bottom: 0.25rem;">AUTOESTIMA</div>
+                        <div style="font-size: 1.4rem; font-weight: 800;">${Math.round(p.selfEsteem)}%</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 0.7rem; font-weight: bold; color: #64748b; margin-bottom: 0.25rem;">PENSAMIENTO</div>
+                        <div style="font-size: 1.4rem; font-weight: 800;">${Math.round(p.criticalThinking)}%</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">
+                        <div style="font-size: 0.7rem; font-weight: bold; color: #64748b; margin-bottom: 0.25rem;">ANSIEDAD</div>
+                        <div style="font-size: 1.4rem; font-weight: 800;">${Math.round(p.currentAnxiety)}%</div>
+                    </div>
+                </div>
+                ${extra}
+                <div style="margin-top: 1.5rem;">
+                    <h3 style="font-size: 0.9rem; margin-bottom: 0.75rem;">Historial Reciente</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        ${p.history.slice(-8).map(h => `
+                            <div style="width: 32px; height: 32px; border-radius: 6px; background: ${h.isCorrect ? 'var(--success-color)' : 'var(--error-color)'}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.7rem;">
+                                ${h.choice}
+                            </div>
+                        `).join('') || '<p style="color:#94a3b8; font-size: 0.8rem; font-style: italic;">Sin ensayos registrados.</p>'}
+                    </div>
+                </div>`;
                 document.getElementById('overlay').classList.remove('hidden');
             }
             closeOverlays() { document.getElementById('overlay').classList.add('hidden'); }
         }
 
         class StatsManager {
-            constructor(sim) { this.sim = sim; this.history = []; }
+            constructor(sim) {
+                this.sim = sim;
+                this.history = [];
+                this.historyB = [];
+            }
             update() {
                 const s = this.sim.stats;
+                const sB = window.simulation2 ? window.simulation2.stats : null;
+                const isComp = window.ui.isComp && sB;
+
                 document.getElementById('stat-rounds').textContent = s.total;
                 document.getElementById('stat-conformity').textContent = `${s.total?Math.round(s.conformity/s.total*100):0}%`;
                 document.getElementById('stat-latency').textContent = Math.round(s.avgDecisionTime);
                 document.getElementById('stat-avg-pressure').textContent = Math.round(s.avgPressure);
+
+                if (isComp) {
+                    document.getElementById('stat-rounds-b').textContent = ` / ${sB.total}`;
+                    document.getElementById('stat-conformity-b').textContent = ` / ${sB.total?Math.round(sB.conformity/sB.total*100):0}%`;
+                    document.getElementById('stat-latency-b').textContent = ` / ${Math.round(sB.avgDecisionTime)}`;
+                    document.getElementById('stat-avg-pressure-b').textContent = ` / ${Math.round(sB.avgPressure)}`;
+
+                    this.historyB.push(sB.total ? (sB.conformity/sB.total*100) : 0);
+                    if (this.historyB.length > 50) this.historyB.shift();
+                }
+
                 this.history.push(s.total ? (s.conformity/s.total*100) : 0);
                 if (this.history.length > 50) this.history.shift();
+
                 this.draw();
             }
             draw() {
                 const canvas = document.getElementById('conformity-chart'); if(!canvas) return;
                 const ctx = canvas.getContext('2d'); const w = canvas.width, h = canvas.height;
+                const isComp = window.ui.isComp && window.simulation2;
+
                 ctx.clearRect(0,0,w,h);
                 ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1; for(let i=1; i<4; i++) { ctx.beginPath(); ctx.moveTo(0, h*(i/4)); ctx.lineTo(w, h*(i/4)); ctx.stroke(); }
                 ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)'; ctx.beginPath(); ctx.moveTo(0, h * 0.67); ctx.lineTo(w, h * 0.67); ctx.stroke(); ctx.setLineDash([]);
+
+                // Sim A Line
                 ctx.strokeStyle = 'var(--accent-color)'; ctx.lineWidth = 3; ctx.beginPath();
-                this.history.forEach((v, i) => { const x = (i/49)*w; const y = h - (v/100)*h; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }); ctx.stroke();
+                this.history.forEach((v, i) => { const x = (i/49)*w; const y = h - (v/100)*h; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+                ctx.stroke();
+
+                // Sim B Line
+                if (isComp && this.historyB.length > 0) {
+                    ctx.strokeStyle = 'var(--success-color)'; ctx.lineWidth = 3; ctx.beginPath();
+                    this.historyB.forEach((v, i) => { const x = (i/49)*w; const y = h - (v/100)*h; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+                    ctx.stroke();
+                }
+
+                // Histogram
                 const hist = document.getElementById('histogram-chart').getContext('2d');
                 const hw = hist.canvas.width, hh = hist.canvas.height; hist.clearRect(0,0,hw,hh);
+
                 const total = Math.max(1, this.sim.stats.total);
-                const corrH = (this.sim.stats.correct/total) * (hh-40); const confH = (this.sim.stats.conformity/total) * (hh-40);
-                const drawBar = (x, height, color, label) => {
-                    hist.fillStyle = color; hist.beginPath(); hist.roundRect(x, hh - 25 - height, 40, height, [4, 4, 0, 0]); hist.fill();
-                    hist.fillStyle = '#64748b'; hist.font = '10px Inter'; hist.textAlign = 'center'; hist.fillText(label, x + 20, hh - 10);
-                };
-                drawBar(hw*0.2, corrH, 'var(--success-color)', 'IND'); drawBar(hw*0.6, confH, 'var(--error-color)', 'CONF');
+                const corrH = (this.sim.stats.correct/total) * (hh-40);
+                const confH = (this.sim.stats.conformity/total) * (hh-40);
+
+                if (isComp && window.simulation2) {
+                    const totalB = Math.max(1, window.simulation2.stats.total);
+                    const corrHB = (window.simulation2.stats.correct/totalB) * (hh-40);
+                    const confHB = (window.simulation2.stats.conformity/totalB) * (hh-40);
+
+                    // Dual bars
+                    const drawDual = (x, h1, h2, label) => {
+                        hist.fillStyle = 'var(--accent-color)'; hist.beginPath(); hist.roundRect(x, hh-25-h1, 15, h1, [4,4,0,0]); hist.fill();
+                        hist.fillStyle = 'var(--success-color)'; hist.beginPath(); hist.roundRect(x+18, hh-25-h2, 15, h2, [4,4,0,0]); hist.fill();
+                        hist.fillStyle = '#64748b'; hist.font = '8px Inter'; hist.textAlign = 'center'; hist.fillText(label, x+16, hh-10);
+                    };
+                    drawDual(hw*0.15, corrH, corrHB, 'INDEPENDENCIA');
+                    drawDual(hw*0.6, confH, confHB, 'CONFORMIDAD');
+                } else {
+                    const drawBar = (x, height, color, label) => {
+                        hist.fillStyle = color; hist.beginPath(); hist.roundRect(x, hh - 25 - height, 40, height, [4, 4, 0, 0]); hist.fill();
+                        hist.fillStyle = '#64748b'; hist.font = '10px Inter'; hist.textAlign = 'center'; hist.fillText(label, x + 20, hh - 10);
+                    };
+                    drawBar(hw*0.2, corrH, 'var(--success-color)', 'IND');
+                    drawBar(hw*0.6, confH, 'var(--error-color)', 'CONF');
+                }
             }
         }
 
         let simulation1, ui, statsManager;
         window.onload = () => {
-            simulation1 = new Simulation('sim-1', false); statsManager = new StatsManager(simulation1);
-            window.statsManager = statsManager; ui = new UIManager(simulation1); window.ui = ui; ui.init();
+            simulation1 = new Simulation('sim-1', false); window.simulation1 = simulation1;
+            statsManager = new StatsManager(simulation1); window.statsManager = statsManager;
+            ui = new UIManager(simulation1); window.ui = ui; ui.init();
             document.getElementById('simulations-wrapper').addEventListener('click', (e) => {
                 const container = e.target.closest('.avatar-container');
                 if (container) {
