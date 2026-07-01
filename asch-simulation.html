@@ -1212,33 +1212,138 @@
             toggleDidactic() {
                 const body = document.getElementById('modal-body');
                 body.innerHTML = `
-                <div style="max-width: 800px;">
+                <div style="max-width: 900px; color: var(--text-color); line-height: 1.6;">
+                    <!-- Cabecera -->
                     <div style="display: flex; align-items: center; gap: 1.5rem; border-bottom: 2px solid var(--accent-color); padding-bottom: 1.5rem; margin-bottom: 2rem;">
                         <div style="width: 64px; height: 64px; background: var(--primary-color); border-radius: 16px; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.8rem; font-weight: 800; box-shadow: var(--shadow-md);">A</div>
-                        <div><h2 style="margin: 0; font-size: 1.8rem; letter-spacing: -0.02em;">Guía Educativa: El Experimento de Asch</h2><p style="color: #64748b; margin: 0; font-size: 0.9rem;">Psicología Social y Mecanismos de Influencia</p></div>
+                        <div><h2 style="margin: 0; font-size: 2rem; letter-spacing: -0.02em;">Simulador Educativo: Experimento de Asch</h2><p style="color: #64748b; margin: 0; font-size: 1rem; font-weight: 500;">Un análisis profundo de la conformidad social y la independencia de juicio.</p></div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 2.5rem;">
-                        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
-                            <h3 style="margin-top:0; font-size: 1rem; color: var(--primary-color);">Solomon Asch (1907-1996)</h3>
-                            <p style="font-size: 0.85rem; color: #475569;">Demostró que la presión social puede hacer que la gente ignore la realidad evidente.</p>
-                            <svg viewBox="0 0 100 100" style="width:100%; height:auto; margin-top:1rem; opacity:0.8;"><circle cx="50" cy="40" r="20" fill="#cbd5e1"/><path d="M20,90 Q50,70 80,90" stroke="#cbd5e1" stroke-width="8" fill="none"/></svg>
+
+                    <!-- Introducción -->
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 3rem;">
+                        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
+                            <h3 style="margin-top:0; font-size: 1.1rem; color: var(--primary-color);">Solomon Asch (1951)</h3>
+                            <p style="font-size: 0.9rem; color: #475569;">"La tendencia a la conformidad en nuestra sociedad es tan fuerte que jóvenes con inteligencia y buena voluntad están dispuestos a llamar blanco a lo que es negro".</p>
+                            <div style="width: 100px; height: 100px; background: #cbd5e1; border-radius: 50%; margin: 1.5rem auto; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">👨‍🔬</div>
                         </div>
                         <div>
-                            <h3 style="margin-top:0; font-size: 1.2rem; margin-bottom: 1rem;">El Dilema de la Conformidad</h3>
-                            <p style="font-size: 0.95rem; margin-bottom: 1rem;">Asch descubrió que los individuos a menudo prefieren estar "equivocados con el grupo" que "correctos por sí mismos".</p>
-                            <div style="display: flex; gap: 1rem;"><div style="flex:1; background: #eff6ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-color);"><strong>Normativa</strong><br><span style="font-size: 0.8rem;">Deseo de encajar y evitar el rechazo.</span></div><div style="flex:1; background: #ecfdf5; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--success-color);"><strong>Informativa</strong><br><span style="font-size: 0.8rem;">Duda de la propia percepción ante la mayoría.</span></div></div>
+                            <h3 style="margin-top:0; font-size: 1.4rem; margin-bottom: 1rem; color: var(--primary-color);">¿Por qué nos conformamos?</h3>
+                            <p style="margin-bottom: 1.5rem;">Asch demostró que la presión del grupo puede alterar el juicio incluso en tareas perceptivas evidentes. Identificó dos tipos de influencia:</p>
+                            <div style="display: flex; gap: 1.5rem;">
+                                <div style="flex:1; background: #eff6ff; padding: 1.25rem; border-radius: 12px; border-left: 5px solid var(--accent-color);">
+                                    <strong style="display:block; margin-bottom:0.5rem; color: var(--primary-color);">Influencia Normativa</strong>
+                                    <span style="font-size: 0.85rem;">Conformarse para ser aceptado o evitar el ridículo social. El sujeto no cambia su creencia interna, solo su respuesta pública.</span>
+                                </div>
+                                <div style="flex:1; background: #ecfdf5; padding: 1.25rem; border-radius: 12px; border-left: 5px solid var(--success-color);">
+                                    <strong style="display:block; margin-bottom:0.5rem; color: #065f46;">Influencia Informativa</strong>
+                                    <span style="font-size: 0.85rem;">Conformarse porque se cree que el grupo tiene mejor información que uno mismo. Ocurre cuando dudamos de nuestros sentidos.</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--primary-color);">Factores que Alteran la Conformidad</h3>
-                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2.5rem;">
-                        <div style="text-align:center; padding:1rem;">👥<br><h4>Tamaño del Grupo</h4><p style="font-size: 0.75rem;">La presión se estabiliza tras 3 personas.</p></div>
-                        <div style="text-align:center; padding:1rem;">🤝<br><h4>El Aliado Disidente</h4><p style="font-size: 0.75rem;">Reduce la conformidad del 33% al 5%.</p></div>
-                        <div style="text-align:center; padding:1rem;">📝<br><h4>Privacidad</h4><p style="font-size: 0.75rem;">Elimina casi toda la conformidad normativa.</p></div>
-                    </div>
-                    <div style="background: #1e293b; color: white; padding: 1.5rem; border-radius: 12px; margin-top: 1rem;">
-                        <h4 style="margin-top:0; color: #38bdf8;">Redes Sociales y Polarización</h4>
-                        <p style="font-size: 0.85rem; line-height: 1.6; margin:0;">El "like" actúa hoy como la presión grupal de Asch a escala global. El miedo al aislamiento digital fomenta el <strong>pensamiento grupal</strong> y la <strong>polarización</strong>, donde nos conformamos con la opinión de nuestra burbuja informativa para evitar el rechazo social.</p>
-                    </div>
+
+                    <!-- Paso a Paso -->
+                    <section style="margin-bottom: 3rem; position: relative;">
+                        <h3 style="font-size: 1.5rem; color: var(--primary-color); border-left: 4px solid var(--accent-color); padding-left: 1rem; margin-bottom: 1.5rem;">Cronología del Experimento</h3>
+                        <div style="display: flex; gap: 1rem; position: relative;">
+                            <div style="position: absolute; top: 25px; left: 0; width: 100%; height: 2px; background: #e2e8f0; z-index: 0;"></div>
+                            <div style="flex: 1; background: white; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 16px; z-index: 1; position: relative; box-shadow: var(--shadow-sm);">
+                                <div style="width: 32px; height: 32px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 1rem; border: 4px solid white;">1</div>
+                                <h5 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Reclutamiento</h5>
+                                <p style="font-size: 0.75rem; margin: 0; color: #64748b;">El "sujeto ingenuo" llega a una sala con 7 personas que cree son participantes reales.</p>
+                            </div>
+                            <div style="flex: 1; background: white; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 16px; z-index: 1; position: relative; box-shadow: var(--shadow-sm);">
+                                <div style="width: 32px; height: 32px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 1rem; border: 4px solid white;">2</div>
+                                <h5 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Los Ensayos</h5>
+                                <p style="font-size: 0.75rem; margin: 0; color: #64748b;">Se realizan 18 comparaciones. En los primeros 2, todos responden correctamente para ganar confianza.</p>
+                            </div>
+                            <div style="flex: 1; background: white; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 16px; z-index: 1; position: relative; box-shadow: var(--shadow-sm);">
+                                <div style="width: 32px; height: 32px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 1rem; border: 4px solid white;">3</div>
+                                <h5 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">La Crisis</h5>
+                                <p style="font-size: 0.75rem; margin: 0; color: #64748b;">En el ensayo 3, todos los cómplices eligen una línea obviamente incorrecta antes que el sujeto.</p>
+                            </div>
+                            <div style="flex: 1; background: white; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 16px; z-index: 1; position: relative; box-shadow: var(--shadow-sm);">
+                                <div style="width: 32px; height: 32px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 1rem; border: 4px solid white;">4</div>
+                                <h5 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Entrevista</h5>
+                                <p style="font-size: 0.75rem; margin: 0; color: #64748b;">Al final, se revela la verdad y se entrevista al sujeto sobre sus sentimientos de tensión y duda.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Muestra de Resultados -->
+                    <section style="margin-bottom: 3rem;">
+                        <h3 style="font-size: 1.5rem; color: var(--primary-color); border-left: 4px solid var(--accent-color); padding-left: 1rem; margin-bottom: 1.5rem;">Resultados y Muestras Estadísticas</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                            <div style="background: white; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;"><span>Sujetos que confor. al menos 1 vez</span><strong>75%</strong></div>
+                                <div style="width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-bottom: 1.5rem;"><div style="width: 75%; height: 100%; background: var(--accent-color); border-radius: 5px;"></div></div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;"><span>Tasa media de conformidad</span><strong>33.2%</strong></div>
+                                <div style="width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-bottom: 1.5rem;"><div style="width: 33.2%; height: 100%; background: var(--error-color); border-radius: 5px;"></div></div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;"><span>Sujetos totalmente independientes</span><strong>25%</strong></div>
+                                <div style="width: 100%; height: 10px; background: #eee; border-radius: 5px;"><div style="width: 25%; height: 100%; background: var(--success-color); border-radius: 5px;"></div></div>
+                            </div>
+                            <div style="font-size: 0.9rem;">
+                                <p><strong>Hallazgo clave:</strong> En ausencia de presión grupal (grupo de control), el error fue de menos del <strong>1%</strong>.</p>
+                                <p>Esto demuestra que el error no es perceptivo, sino puramente social. Tras el experimento, muchos sujetos reportaron haber sentido una ansiedad extrema ("sudoración", "confusión") al discrepar del grupo.</p>
+                            </div>
+                        </div>
+
+                        <!-- Ejemplos de Variaciones -->
+                        <h4 style="font-size: 1.1rem; margin-bottom: 1rem;">Ejemplos de Impacto por Variable:</h4>
+                        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                            <div style="background: #fff; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 12px; font-size: 0.8rem;">
+                                <strong>Tamaño de Mayoría</strong><br>
+                                Con 1 cómplice: 3% conf.<br>
+                                Con 2 cómplices: 13% conf.<br>
+                                Con 3+ cómplices: 32-37% conf.
+                            </div>
+                            <div style="background: #fff; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 12px; font-size: 0.8rem;">
+                                <strong>El Aliado (Soporte Social)</strong><br>
+                                Si un solo cómplice da la respuesta correcta, la conformidad cae drásticamente al <strong>5%</strong>. Romper la unanimidad es el factor más potente.
+                            </div>
+                            <div style="background: #fff; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 12px; font-size: 0.8rem;">
+                                <strong>Dificultad de la Tarea</strong><br>
+                                Si las líneas son muy parecidas (tarea ambigua), la <em>influencia informativa</em> aumenta y la conformidad sube significativamente.
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Implicaciones y Modernidad -->
+                    <section style="margin-bottom: 3rem;">
+                        <h3 style="font-size: 1.5rem; color: var(--primary-color); border-left: 4px solid var(--accent-color); padding-left: 1rem; margin-bottom: 1.5rem;">Implicaciones en el Mundo Real</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border-top: 4px solid #64748b;">
+                                <h4 style="margin-top: 0;">Pensamiento Grupal (Groupthink)</h4>
+                                <p style="font-size: 0.85rem; margin-bottom: 0;">Ocurre cuando el deseo de armonía en un grupo de toma de decisiones anula la evaluación realista de alternativas. Es la base de muchos desastres históricos.</p>
+                            </div>
+                            <div style="background: #1e293b; color: white; padding: 1.5rem; border-radius: 12px; border-top: 4px solid #38bdf8;">
+                                <h4 style="margin-top: 0; color: #38bdf8;">Efecto Algorítmico y Redes</h4>
+                                <p style="font-size: 0.85rem; margin-bottom: 0;">El "like" y las métricas de aprobación social actúan como cómplices digitales. Refuerzan la conformidad dentro de burbujas informativas, castigando el pensamiento crítico divergente.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Reflexión -->
+                    <section style="margin-top: 3rem; border-top: 1px solid #e2e8f0; padding-top: 2rem; margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.3rem; color: var(--primary-color); margin-bottom: 1rem;">Preguntas para la Reflexión</h3>
+                        <div style="font-size: 0.9rem; color: #475569;">
+                            <ul style="padding-left: 1.2rem;">
+                                <li>¿Hasta qué punto nuestras opiniones en redes sociales son realmente nuestras y no una respuesta a la presión de la "mayoría"?</li>
+                                <li>¿Cómo podemos fomentar entornos donde la disidencia y el pensamiento crítico sean valorados en lugar de castigados?</li>
+                                <li>En situaciones de emergencia, ¿cómo influye la conformidad en la inacción del grupo (Efecto Espectador)?</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- Referencias -->
+                    <footer style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; font-size: 0.8rem; color: #64748b;">
+                        <h4 style="margin-top: 0; color: var(--text-color); font-size: 0.9rem;">Referencias Bibliográficas</h4>
+                        <ul style="margin: 0; padding-left: 1.2rem;">
+                            <li>Asch, S. E. (1951). <em>Effects of group pressure upon the modification and distortion of judgments</em>. Groups, Leadership and Men, 222-236.</li>
+                            <li>Asch, S. E. (1956). <em>Studies of independence and conformity: I. A minority of one against a unanimous majority</em>. Psychological Monographs: General and Applied, 70(9), 1-70.</li>
+                            <li>Bond, R., & Smith, P. B. (1996). <em>Culture and conformity: A meta-analysis of studies using Asch's (1952, 1956) line judgment task</em>. Psychological Bulletin.</li>
+                        </ul>
+                    </footer>
                 </div>`;
                 document.getElementById('overlay').classList.remove('hidden');
             }
@@ -1246,17 +1351,46 @@
                 const s1 = this.sim.stats; const s2 = window.simulation2 && window.ui.isComp ? window.simulation2.stats : null;
                 const body = document.getElementById('modal-body');
                 const getAnalysis = (s) => {
-                    if (!s || s.total === 0) return "Datos insuficientes.";
+                    if (!s || s.total === 0) return "Datos insuficientes para análisis estadístico.";
                     const rate = (s.conformity / s.total) * 100;
-                    if (rate > 33) return "<strong>Alta Conformidad:</strong> Dependencia excesiva del grupo (Superior al 33% histórico).";
-                    if (rate > 10) return "<strong>Conformidad Moderada:</strong> Resistencia con episodios de vulnerabilidad.";
-                    return "<strong>Independencia Significativa:</strong> Mantiene su juicio ante presión masiva.";
+                    if (rate > 33) return "<div style='color:#e11d48; font-weight:700;'>ALTA CONFORMIDAD</div><p style='font-size:0.85rem;'>El sujeto muestra una dependencia del grupo superior a la media de Asch. Esto sugiere una fuerte Influencia Normativa o baja confianza perceptiva.</p>";
+                    if (rate > 10) return "<div style='color:#ea580c; font-weight:700;'>CONFORMIDAD MODERADA</div><p style='font-size:0.85rem;'>El sujeto mantiene su independencia en la mayoría de los casos, pero cede ante la presión en ensayos críticos.</p>";
+                    return "<div style='color:#16a34a; font-weight:700;'>INDEPENDENCIA SIGNIFICATIVA</div><p style='font-size:0.85rem;'>El sujeto demuestra una alta resistencia a la presión social, priorizando su percepción individual sobre el consenso grupal.</p>";
                 };
+
+                const renderStats = (s, title) => `
+                    <div style="background: #f8fafc; padding: 2rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm);">
+                        <h3 style="margin-top:0; color:var(--primary-color); font-size:1.3rem;">${title}</h3>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin:1.5rem 0;">
+                            <div style="background:white; padding:1rem; border-radius:12px; border:1px solid #f1f5f9; text-align:center;">
+                                <div style="font-size:0.7rem; color:#64748b; font-weight:800;">ENSAYOS</div>
+                                <div style="font-size:1.5rem; font-weight:800;">${s.total}</div>
+                            </div>
+                            <div style="background:white; padding:1rem; border-radius:12px; border:1px solid #f1f5f9; text-align:center;">
+                                <div style="font-size:0.7rem; color:#64748b; font-weight:800;">CONFORMIDAD</div>
+                                <div style="font-size:1.5rem; font-weight:800; color:var(--error-color);">${s.total?Math.round(s.conformity/s.total*100):0}%</div>
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid #e2e8f0; padding-top:1rem;">
+                            <div style="font-size:0.7rem; color:#64748b; font-weight:800; margin-bottom:0.5rem; text-transform:uppercase;">Diagnóstico Psicosocial</div>
+                            ${getAnalysis(s)}
+                        </div>
+                    </div>
+                `;
+
                 body.innerHTML = `
-                <h2 style="font-size: 1.8rem;">Informe Analítico de Psicología Social</h2>
-                <div style="display:grid; grid-template-columns: ${s2?'1fr 1fr':'1fr'}; gap: 1.5rem; margin-top: 1rem;">
-                    <div style="background:#f1f5f9; padding:1.5rem; border-radius:12px;"><h3>Simulación A</h3><p>${s1.total?Math.round(s1.conformity/s1.total*100):0}% de Conformidad</p><p>${getAnalysis(s1)}</p></div>
-                    ${s2 ? `<div style="background:#f1f5f9; padding:1.5rem; border-radius:12px;"><h3>Simulación B</h3><p>${s2.total?Math.round(s2.conformity/s2.total*100):0}% de Conformidad</p><p>${getAnalysis(s2)}</p></div>` : ''}
+                <div style="max-width:850px;">
+                    <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem;">
+                        <div style="font-size:2.5rem;">📊</div>
+                        <div>
+                            <h2 style="margin:0; font-size:1.8rem; letter-spacing: -0.02em;">Informe Analítico de Psicología Social</h2>
+                            <p style="margin:0; color:#64748b; font-size:0.9rem;">Métricas de comportamiento y resistencia a la presión</p>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: ${s2?'1fr 1fr':'1fr'}; gap: 2rem;">
+                        ${renderStats(s1, "Simulación A (Control)")}
+                        ${s2 ? renderStats(s2, "Simulación B (Experimento)") : ''}
+                    </div>
                 </div>`;
                 document.getElementById('overlay').classList.remove('hidden');
             }
