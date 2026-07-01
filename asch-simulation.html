@@ -12,14 +12,14 @@
             --success-color: #10b981;
             --error-color: #ef4444;
             --warning-color: #f59e0b;
-            --bg-color: #f8fafc;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
             --text-color: #1e293b;
-            --border-radius: 16px;
+            --border-radius: 12px;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,8 +28,9 @@
             font-family: var(--font-main);
             background-color: var(--bg-color);
             color: var(--text-color);
-            line-height: 1.6;
+            line-height: 1.5;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         #app { display: flex; flex-direction: column; min-height: 100vh; }
@@ -37,22 +38,19 @@
         header {
             background-color: var(--primary-color);
             color: white;
-            padding: 1.25rem 2.5rem;
+            padding: 0.75rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-sm);
             z-index: 1000;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         header h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
             text-transform: uppercase;
         }
 
@@ -643,6 +641,12 @@
                 this.currentAnxiety = 30;
                 this.history = [];
                 this.element = null;
+
+                // Procedural variety
+                this.skinHue = 20 + Math.random() * 20;
+                this.skinSat = 30 + Math.random() * 30;
+                this.skinLum = 50 + Math.random() * 30;
+                this.shirtHue = Math.random() * 360;
             }
 
             render(total, index) {
@@ -658,9 +662,8 @@
                 const avatar = document.createElement('div');
                 avatar.className = `avatar ${this.isSubject ? 'subject' : 'confederate'}`;
 
-                // Variation in skin tones and shirt colors
-                const skinTone = `hsl(${30 + (this.id * 7) % 20}, ${30 + (this.id * 5) % 30}%, ${60 + (this.id * 3) % 20}%)`;
-                const shirtColor = this.isSubject ? 'var(--accent-color)' : `hsl(${210 + (this.id * 40) % 60}, 40%, 40%)`;
+                const skinTone = `hsl(${this.skinHue}, ${this.skinSat}%, ${this.skinLum}%)`;
+                const shirtColor = this.isSubject ? 'var(--accent-color)' : `hsl(${this.shirtHue}, 40%, 45%)`;
 
                 const heads = [
                     "M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4",
@@ -811,6 +814,23 @@
             async startRound() {
                 if (this.isRunning) return;
                 this.isRunning = true;
+
+                // Synchronize logic for comparison mode
+                if (this.containerId === 'sim-1' && window.ui.isComp && window.simulation2) {
+                    window.simulation2.syncRound(this.startRoundLogic());
+                    return;
+                }
+
+                await this.startRoundLogic();
+            }
+
+            async syncRound(logicPromise) {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                await logicPromise;
+            }
+
+            async startRoundLogic() {
                 const correctIdx = Math.floor(Math.random() * 3);
                 const base = 100 + Math.random() * 50;
                 const options = [0,1,2].map(i => i === correctIdx ? base : base + (Math.random() > 0.5 ? 30 : -30));
@@ -871,25 +891,35 @@
                 const totalConfederates = this.participants.length - 1;
                 const isUnanimousError = (errors === totalConfederates) && totalConfederates > 0;
 
-                // Base probability from group pressure
-                let prob = (errors / Math.max(1, totalConfederates)) * 0.6;
+                // Asch curve: Conformity increases with majority size but plateaus after 3-4 people
+                const majoritySizeEffect = Math.min(1.0, errors / 4);
 
-                // Modifiers: Increase conformity
-                prob += (p.socialAnxiety / 250);
-                prob += (p.needAcceptance / 300);
+                // Base probability from group pressure scaled by majority size effect
+                let prob = majoritySizeEffect * 0.65;
 
-                // Reducers: Decrease conformity
-                prob -= (p.criticalThinking / 400);
-                prob -= (p.selfEsteem / 500);
-                prob -= (p.perceptionConfidence / 300);
+                // Trait Weights (Non-linear influence)
+                const anxietyMod = Math.pow(p.socialAnxiety / 100, 1.5) * 0.4;
+                const acceptanceMod = (p.needAcceptance / 100) * 0.3;
+                const thinkingMod = Math.pow(p.criticalThinking / 100, 2) * 0.5;
+                const esteemMod = (p.selfEsteem / 100) * 0.2;
+                const confidenceMod = (p.perceptionConfidence / 100) * 0.4;
 
-                // Ally Effect: Drastic drop if unanimity is broken
-                if (!isUnanimousError && totalConfederates > 1) prob *= 0.15;
+                prob += anxietyMod + acceptanceMod;
+                prob -= thinkingMod + esteemMod + confidenceMod;
 
-                // Environment Effect
-                if (this.config.environment !== 'laboratory') prob *= 0.7;
+                // Ally Effect: Breaking unanimity provides "social support" for independence
+                // In Asch's experiments, a single partner reduced error rates by 75-80%
+                if (!isUnanimousError && errors > 0) prob *= 0.2;
 
-                const finalProb = Math.max(0.01, Math.min(0.99, prob));
+                // Environment Effect: Virtual environments reduce social presence/normative pressure
+                if (this.config.environment === 'chat') prob *= 0.5;
+                if (this.config.environment === 'video') prob *= 0.75;
+
+                const finalProb = Math.max(0.01, Math.min(0.98, prob));
+
+                // Record internal state for debugging/analytics
+                p.lastDecisionProb = finalProb;
+
                 return Math.random() < finalProb ? this.currentRound.error : this.currentRound.correct;
             }
 
@@ -919,17 +949,56 @@
             }
 
             updatePressureMap(errors) {
-                if (!this.pressureSVG || this.config.environment !== 'laboratory' || errors === 0) { this.pressureSVG.innerHTML = ''; return; }
-                this.pressureSVG.innerHTML = '<defs><marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="rgba(255,0,0,0.5)"/></marker></defs>';
+                if (!this.pressureSVG || this.config.environment !== 'laboratory' || errors === 0) {
+                    if (this.pressureSVG) this.pressureSVG.innerHTML = '';
+                    return;
+                }
+
+                this.pressureSVG.innerHTML = `
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="rgba(239, 68, 68, 0.6)"/>
+                        </marker>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>`;
+
                 const sub = this.participants.find(p => p.isSubject).element.getBoundingClientRect();
                 const room = this.container.querySelector('.experimental-room').getBoundingClientRect();
+
                 this.participants.forEach(p => {
-                    if (p.isSubject || p.history.length > this.stats.total) return;
+                    if (p.isSubject) return;
+
+                    // Only draw for confederates who have already spoken in this round
+                    if (p.history.length <= this.stats.total) return;
+
+                    const lastChoice = p.history[p.history.length-1];
+                    if (lastChoice.isCorrect) return; // Only errors exert pressure in the Asch model
+
                     const r = p.element.getBoundingClientRect();
                     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute('x1', r.left - room.left + 50); line.setAttribute('y1', r.top - room.top + 50);
-                    line.setAttribute('x2', sub.left - room.left + 50); line.setAttribute('y2', sub.top - room.top + 50);
-                    line.setAttribute('stroke', 'rgba(255,0,0,0.2)'); line.setAttribute('stroke-width', '2'); line.setAttribute('marker-end', 'url(#arrow)');
+
+                    line.setAttribute('x1', r.left - room.left + 50);
+                    line.setAttribute('y1', r.top - room.top + 50);
+                    line.setAttribute('x2', sub.left - room.left + 50);
+                    line.setAttribute('y2', sub.top - room.top + 50);
+
+                    line.setAttribute('stroke', 'rgba(239, 68, 68, 0.4)');
+                    line.setAttribute('stroke-width', '3');
+                    line.setAttribute('stroke-dasharray', '5,5');
+                    line.setAttribute('marker-end', 'url(#arrow)');
+                    line.setAttribute('filter', 'url(#glow)');
+
+                    const anim = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                    anim.setAttribute('attributeName', 'stroke-dashoffset');
+                    anim.setAttribute('from', '20');
+                    anim.setAttribute('to', '0');
+                    anim.setAttribute('dur', '1s');
+                    anim.setAttribute('repeatCount', 'indefinite');
+                    line.appendChild(anim);
+
                     this.pressureSVG.appendChild(line);
                 });
             }
@@ -1045,16 +1114,19 @@
                     </div>
 
                     <div style="background: var(--secondary-color); color: white; padding: 2rem; border-radius: 16px;">
-                        <h3 style="margin-top:0; color: #60a5fa; font-size: 1.1rem;">Relevancia Contemporánea</h3>
+                        <h3 style="margin-top:0; color: #60a5fa; font-size: 1.1rem;">Relevancia Contemporánea y Aplicaciones</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-size: 0.85rem; line-height: 1.6;">
                             <div>
-                                <strong style="color: #93c5fd;">Redes Sociales:</strong> Los "likes" y el "scroll" infinito actúan como una presión de grupo constante, fomentando el pensamiento grupal y la polarización.
+                                <strong style="color: #93c5fd;">Redes Sociales y Algoritmos:</strong>
+                                Los "likes" y la validación algorítmica crean cámaras de eco donde la conformidad normativa se automatiza. El miedo al "cancelamiento" actúa como una presión de grupo modernizada.
                             </div>
                             <div>
-                                <strong style="color: #93c5fd;">Fake News:</strong> La repetición de una falsedad por una mayoría percibida (influencia informativa) nos hace dudar de los hechos objetivos.
+                                <strong style="color: #93c5fd;">Desinformación y Fake News:</strong>
+                                La <em>Influencia Informativa</em> ocurre cuando dudamos de nuestra percepción ante una mayoría (bots o perfiles falsos) que afirma una falsedad, llevándonos a aceptar "hechos alternativos".
                             </div>
                             <div style="grid-column: span 2; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-                                <strong style="color: #93c5fd;">Pensamiento Grupal (Groupthink):</strong> Cuando el deseo de armonía en el grupo supera la evaluación realista de alternativas, llevando a decisiones irracionales o disfuncionales.
+                                <strong style="color: #93c5fd;">Pensamiento Grupal (Groupthink) en Equipos:</strong>
+                                En entornos corporativos o políticos, el deseo de unanimidad puede suprimir el pensamiento crítico. La lección de Asch es vital: la presencia de un solo disidente (el "Abogado del Diablo") es suficiente para romper el hechizo de la conformidad y mejorar radicalmente la toma de decisiones.
                             </div>
                         </div>
                     </div>
@@ -1175,14 +1247,34 @@
                 ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1;
                 for(let i=1; i<4; i++) { ctx.beginPath(); ctx.moveTo(0, h*(i/4)); ctx.lineTo(w, h*(i/4)); ctx.stroke(); }
 
-                // Conformity Trend Curve
-                ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)'; ctx.beginPath(); ctx.moveTo(0, h*0.67); ctx.lineTo(w, h*0.67); ctx.stroke(); ctx.setLineDash([]);
+                // Historical Asch Benchmark (33%)
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(0, h * 0.67);
+                ctx.lineTo(w, h * 0.67);
+                ctx.stroke();
 
-                const gradient = ctx.createLinearGradient(0,0,0,h);
-                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
+                ctx.font = '10px Inter';
+                ctx.fillText('BENCHMARK ASCH (33%)', 10, h * 0.67 - 5);
+                ctx.setLineDash([]);
 
-                ctx.strokeStyle = 'var(--accent-color)'; ctx.lineWidth = 3; ctx.beginPath();
-                this.history.forEach((v, i) => { const x = (i/49)*w, y = h - (v/100)*h; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+                // Gradient for area under curve
+                const gradient = ctx.createLinearGradient(0, 0, 0, h);
+                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+                gradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+
+                // Simulation A Line (Blue)
+                ctx.strokeStyle = 'var(--accent-color)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                this.history.forEach((v, i) => {
+                    const x = (i/49)*w;
+                    const y = h - (v/100)*h;
+                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                });
                 ctx.stroke();
 
                 if (this.history.length > 1) {
