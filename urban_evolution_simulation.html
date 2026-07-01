@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Metropolis Lab Pro v12.0 ELITE: Scientific Urban Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-deep: #020408;
@@ -227,7 +230,7 @@
             <div class="stat-card"><span class="stat-label">Coef. Gini (Desigualdad)</span><span id="st-gini" class="stat-value">0.3</span></div>
             <div class="stat-card"><span class="stat-label">Precio Suelo (Media)</span><span id="st-val" class="stat-value">$100</span></div>
             <div class="stat-card"><span class="stat-label">Empleo / Paro</span><span id="st-emp" class="stat-value">0%</span></div>
-            <div class="stat-card"><span class="stat-label">Sup. Urbanizada</span><span id="st-urb" class="stat-value">0%</span></div>
+            <div class="stat-card"><span class="stat-label">Presupuesto Público</span><span id="st-budget" class="stat-value">$0</span></div>
         </div>
 
         <div class="analytics-box">
@@ -276,6 +279,10 @@
             <div class="ctrl-row">
                 <div class="ctrl-header"><label>Vivienda Pública / Subsidios</label><span id="val-sub" class="ctrl-val">10%</span></div>
                 <input type="range" id="sl-sub" min="0" max="100" value="10">
+            </div>
+            <div class="ctrl-row">
+                <div class="ctrl-header"><label>Tasa Impositiva (Tax)</label><span id="val-tax" class="ctrl-val">15%</span></div>
+                <input type="range" id="sl-tax" min="0" max="50" value="15">
             </div>
         </section>
 
@@ -386,9 +393,10 @@ class CitySimulation {
             pop: 0, gdp: 0, poll: 0, happiness: 75,
             ages: new Array(12).fill(0),
             use: {res:0, com:0, ind:0, nat:0},
-            demand: {res: 50, com: 30, ind: 20} // New RCI Demand
+            demand: {res: 50, com: 30, ind: 20}, // New RCI Demand
+            budget: 50000 // Initial budget
         };
-        this.params = { mig: 0.35, inv: 0.3, green: 0.4, nat: 0.02, subsidy: 0.1 };
+        this.params = { mig: 0.35, inv: 0.3, green: 0.4, nat: 0.02, subsidy: 0.1, tax: 0.15 };
         this.events = { indus: false, rail: false, boom: false, crisis: false, pandemic: false, climate: false, war: false, recon: false, resources: false };
         this.seaLevel = 0.28;
         this.dayCycle = 0; // 0 to 1
@@ -510,25 +518,38 @@ class CitySimulation {
     }
 
     updateParticles(dt) {
-        if(Math.random() < this.params.mig * 5 * dt) {
+        if(Math.random() < this.params.mig * 8 * dt) {
+            let startSide = Math.floor(Math.random()*4);
+            let sx, sy;
+            if(startSide === 0) { sx = 0; sy = Math.random()*GH; }
+            else if(startSide === 1) { sx = GW-1; sy = Math.random()*GH; }
+            else if(startSide === 2) { sx = Math.random()*GW; sy = 0; }
+            else { sx = Math.random()*GW; sy = GH-1; }
+
             this.particles.push({
-                x: Math.random() < 0.5 ? 0 : GW-1,
-                y: Math.random() * GH,
-                tx: GW/2 + (Math.random()-0.5)*10,
-                ty: GH/2 + (Math.random()-0.5)*10,
+                x: sx, y: sy,
+                tx: GW/2 + (Math.random()-0.5)*20,
+                ty: GH/2 + (Math.random()-0.5)*20,
                 life: 1.0,
                 type: 'migrant',
-                speed: 0.1 + Math.random()*0.2
+                speed: 0.15 + Math.random()*0.25,
+                hue: 200 + Math.random()*20
             });
         }
         this.particles.forEach(p => {
             if(p.type === 'migrant') {
                 let dx = p.tx - p.x, dy = p.ty - p.y;
                 let dist = Math.sqrt(dx*dx+dy*dy);
-                if(dist > 1) { p.x += (dx/dist)*p.speed; p.y += (dy/dist)*p.speed; }
-                p.life -= 0.005;
+                let osc = Math.sin(this.year * 10 + p.x) * 0.1;
+                if(dist > 1) {
+                    p.x += (dx/dist)*p.speed;
+                    p.y += (dy/dist)*p.speed + osc;
+                }
+                p.life -= 0.003;
             } else if(p.type === 'smoke') {
                 p.x += p.vx; p.y += p.vy;
+                p.life -= 0.02;
+            } else if(p.type === 'flash') {
                 p.life -= 0.02;
             }
         });
@@ -611,9 +632,9 @@ class CitySimulation {
         const industrialTax = this.params.green * 0.5; // High regulation slows industry
 
         // V12: Demand multipliers
-        const resDem = Math.max(0, this.stats.demand.res / 100);
-        const comDem = Math.max(0, this.stats.demand.com / 100);
-        const indDem = Math.max(0, this.stats.demand.ind / 100);
+        const resDem = Math.max(0, (this.stats.demand.res / 100) * (1.2 - this.params.tax));
+        const comDem = Math.max(0, (this.stats.demand.com / 100) * (1.1 - this.params.tax));
+        const indDem = Math.max(0, (this.stats.demand.ind / 100) * (1.0 - this.params.tax));
 
         for(let y=0; y<GH; y++) for(let x=0; x<GW; x++) {
             let t = this.grid[y][x];
@@ -636,8 +657,14 @@ class CitySimulation {
                 }
                 // Socio-economic realignment (Gentrification vs Subsidies)
                 const subEffect = this.params.subsidy;
-                if(t.value > 1000 && t.income < 3 && Math.random() < 0.04 * (1 - subEffect)) t.income = 3;
-                else if(t.value > 600 && t.income < 2 && Math.random() < 0.02 * (1 - subEffect)) t.income = 2;
+                if(t.value > 1000 && t.income < 3 && Math.random() < 0.04 * (1 - subEffect)) {
+                    t.income = 3;
+                    this.particles.push({ x: t.x, y: t.y, life: 1, type: 'flash', color: '#e3b341' });
+                }
+                else if(t.value > 600 && t.income < 2 && Math.random() < 0.02 * (1 - subEffect)) {
+                    t.income = 2;
+                    this.particles.push({ x: t.x, y: t.y, life: 1, type: 'flash', color: '#d29922' });
+                }
 
                 // De-gentrification / Social Support
                 if(t.income > 1 && t.value < 400 && Math.random() < 0.05 * subEffect) t.income--;
@@ -658,21 +685,39 @@ class CitySimulation {
     }
 
     expandCity(x, y) {
-        const nx = x + (Math.random() < 0.5 ? 1 : -1), ny = y + (Math.random() < 0.5 ? 1 : -1);
+        const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+        const dir = directions[Math.floor(Math.random() * 4)];
+        const nx = x + dir[0], ny = y + dir[1];
+
         if(nx>=0 && nx<GW && ny>=0 && ny<GH) {
             let nt = this.grid[ny][nx];
-            if(!nt.zone && nt.terrain !== 'water' && nt.terrain !== 'mountain' && Math.random() < 0.65) {
-                // Demand-driven zoning (V12)
+            if(!nt.zone && nt.terrain !== 'water' && nt.terrain !== 'mountain') {
                 const s = this.stats.demand;
                 const total = Math.max(1, s.res + s.com + s.ind);
                 const r = Math.random() * total;
 
-                if(r < s.res) nt.zone='res';
-                else if(r < s.res + s.com) nt.zone='com';
-                else nt.zone='ind';
+                // Structured Grid Logic: Only build if it maintains a block pattern or extends a road
+                let neighbors = directions.map(d => ({x: nx+d[0], y: ny+d[1]}))
+                    .filter(p => p.x>=0 && p.x<GW && p.y>=0 && p.y<GH);
+                let roadNeighbors = neighbors.filter(p => this.grid[p.y][p.x].road > 0).length;
 
-                nt.pop=80; nt.lvl=1; nt.yearBuilt = Math.floor(this.year);
-                nt.road=(this.mode==='planned'?2:1);
+                if(this.mode === 'planned') {
+                    // Planned: Prefer grids. Only build if road access is guaranteed or expandable.
+                    if(roadNeighbors > 0 || Math.random() < 0.05) {
+                        nt.zone = r < s.res ? 'res' : (r < s.res + s.com ? 'com' : 'ind');
+                        nt.pop = 80; nt.lvl = 1; nt.yearBuilt = Math.floor(this.year);
+                        // Hierarchical Roads: Main avenues every 10 tiles
+                        nt.road = (nx % 10 === 0 || ny % 10 === 0) ? 3 : 2;
+                    }
+                } else {
+                    // Spontaneous: Organic, path-following growth
+                    if(roadNeighbors > 0 || Math.random() < 0.2) {
+                        nt.zone = r < s.res ? 'res' : (r < s.res + s.com ? 'com' : 'ind');
+                        nt.pop = 80; nt.lvl = 1; nt.yearBuilt = Math.floor(this.year);
+                        nt.road = 1;
+                        if(roadNeighbors >= 2) nt.road = 2; // Path upgrade through usage
+                    }
+                }
             }
         }
     }
@@ -701,7 +746,16 @@ class CitySimulation {
         this.stats.pop = Math.floor(p);
         this.stats.gdp = Math.floor(g * (1 + p/15000));
         this.stats.poll = Math.floor(pol/(GW*GH*0.45));
-        this.stats.happiness = Math.max(0, Math.min(100, 85 - this.stats.poll - (b/250)));
+
+        // Fiscal logic
+        let revenue = this.stats.gdp * this.params.tax;
+        let maintenance = b * 5 + (this.params.inv * 5000);
+        let socialCost = this.stats.pop * this.params.subsidy;
+        this.stats.budget += (revenue - maintenance - socialCost);
+
+        this.stats.happiness = Math.max(0, Math.min(100, 85 - this.stats.poll - (b/250) + (this.params.subsidy*100) - (this.params.tax*100)));
+        if(this.stats.budget < 0) this.stats.happiness *= 0.5; // Debt crisis penalty
+
         this.stats.avgVal = Math.floor(totalVal / (GW*GH));
         this.stats.gini = this.calculateGini(incomes);
         this.stats.use = use;
@@ -856,6 +910,33 @@ class MetroRenderer {
             }
         }
 
+        // Urban Decals Layer (Trees & Streetlights)
+        if(this.zoom > 1.2) {
+            for(let sum=0; sum < GW + GH; sum++) {
+                for(let y=0; y <= sum; y++) {
+                    let x = sum - y;
+                    if(x >= 0 && x < GW && y >= 0 && y < GH) {
+                        let t = sim.grid[y][x];
+                        const {px, py} = this.iso(x, y);
+                        if(px < -50 || px > this.cvs.width + 50 || py < -50 || py > this.cvs.height + 50) continue;
+
+                        if(t.road >= 2) {
+                            // Streetlights at night
+                            if(this.ambient < 0.5) {
+                                ctx.fillStyle = 'rgba(255, 255, 100, 0.4)';
+                                ctx.beginPath(); ctx.arc(px, py + this.th/2, 10*this.zoom, 0, Math.PI*2); ctx.fill();
+                            }
+                        }
+                        if(t.distId === 6 && !t.zone && t.terrain !== 'water') {
+                            // Park Trees
+                            ctx.fillStyle = '#1f6feb'; ctx.beginPath();
+                            ctx.arc(px + Math.sin(x)*5, py + Math.cos(y)*3, 4*this.zoom, 0, Math.PI*2); ctx.fill();
+                        }
+                    }
+                }
+            }
+        }
+
         // Vehicle layer
         sim.vehicles.forEach(v => {
             const {px, py} = this.iso(v.x, v.y);
@@ -880,14 +961,22 @@ class MetroRenderer {
         sim.particles.forEach(p => {
             if(p.type === 'migrant') {
                 const {px, py} = this.iso(p.x, p.y);
-                ctx.shadowBlur = 10 * this.zoom; ctx.shadowColor = '#58a6ff';
-                ctx.fillStyle = `rgba(88, 166, 255, ${p.life})`;
-                ctx.beginPath(); ctx.arc(px, py, 3 * this.zoom, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 12 * this.zoom; ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 0.5)`;
+                ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.life})`;
+                ctx.beginPath(); ctx.arc(px, py, 2.5 * this.zoom, 0, Math.PI*2); ctx.fill();
+                // Tail
+                ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.life * 0.3})`;
+                ctx.beginPath(); ctx.arc(px - (p.tx-p.x)*2, py - (p.ty-p.y)*2, 1.5*this.zoom, 0, Math.PI*2); ctx.fill();
                 ctx.shadowBlur = 0;
             } else if(p.type === 'smoke') {
                 const {px, py} = this.iso(p.x, p.y);
                 ctx.fillStyle = `rgba(139, 148, 158, ${p.life * 0.4})`;
                 ctx.beginPath(); ctx.arc(px, py - p.h * this.zoom, 6 * this.zoom * (2 - p.life), 0, Math.PI*2); ctx.fill();
+            } else if(p.type === 'flash') {
+                const {px, py} = this.iso(p.x, p.y);
+                ctx.strokeStyle = p.color; ctx.globalAlpha = p.life;
+                ctx.lineWidth = 2; ctx.strokeRect(px-15*p.life*this.zoom, py-10*p.life*this.zoom, 30*p.life*this.zoom, 20*p.life*this.zoom);
+                ctx.globalAlpha = 1;
             }
         });
     }
@@ -979,12 +1068,36 @@ class MetroRenderer {
         if(!t.zone) return;
         const ctx = this.ctx;
         const seed = (t.x * 31 + t.y * 17) % 100;
+        const year = t.yearBuilt || 1800;
 
-        let bc = t.income === 3 ? '#e3b341' : (t.income === 2 ? '#d29922' : '#f85149');
-        if(t.zone === 'com') bc = '#58a6ff';
-        else if(t.zone === 'ind') bc = '#484f58';
-        else if(t.zone === 'sky') bc = '#1f6feb';
-        else if(t.zone === 'hosp') bc = '#f0f6fc';
+        // Eras:
+        // 1: 1800-1880 (Neoclassical/Colonial) - Stone, red/brown pitched roofs
+        // 2: 1880-1940 (Industrial/Eclectic) - Red brick, dark grey roofs, chimneys
+        // 3: 1940-2000 (Modernist) - Steel, concrete, glass, blue/white
+        // 4: 2000-2100 (Solarpunk/Future) - Clean white, greenery, neon, solar panels
+
+        let era = 1;
+        if(year > 2000) era = 4;
+        else if(year > 1940) era = 3;
+        else if(year > 1880) era = 2;
+
+        let bc = '#f0f6fc';
+        let detailColor = 'rgba(255,255,255,0.2)';
+
+        if(t.zone === 'res') {
+            if(era === 1) bc = seed > 50 ? '#d4a373' : '#faedcd';
+            else if(era === 2) bc = '#a44a3f';
+            else if(era === 3) bc = '#f0f6fc';
+            else bc = '#e9ecef';
+
+            if(t.income === 3) bc = this.shadeColor(bc, 20); // Luxury variation
+        } else if(t.zone === 'com' || t.zone === 'sky') {
+            if(era <= 2) bc = '#8b949e';
+            else if(era === 3) bc = '#58a6ff';
+            else bc = '#1f6feb';
+        } else if(t.zone === 'ind') {
+            bc = era === 1 ? '#6d4c41' : '#484f58';
+        } else if(t.zone === 'hosp') bc = '#fff';
         else if(t.zone === 'univ') bc = '#3fb950';
 
         // Apply Ambient light to color
@@ -993,10 +1106,10 @@ class MetroRenderer {
         let height = (t.lvl * 2.5 + 6) * this.zoom;
         let wMult = 0.38, hMult = 0.38;
 
-        if(t.zone === 'sky') height = (t.lvl * 4 + 60) * this.zoom;
+        if(t.zone === 'sky') height = (t.lvl * 5 + 80) * this.zoom;
         if(t.zone === 'ind') height = (15 + seed/10) * this.zoom;
-        if(t.zone === 'univ') { height = 25 * this.zoom; wMult = 0.5; hMult = 0.5; }
-        if(t.zone === 'hosp') { height = 35 * this.zoom; }
+        if(t.zone === 'univ') { height = 30 * this.zoom; wMult = 0.5; hMult = 0.5; }
+        if(t.zone === 'hosp') { height = 40 * this.zoom; }
 
         const w = this.tw * wMult, h = this.th * hMult;
         const baseY = y + this.th/2;
@@ -1017,27 +1130,40 @@ class MetroRenderer {
         this.drawFace(x, baseY, -w, -h/2, height, leftC); // Left
         this.drawFace(x, baseY, w, -h/2, height, rightC);  // Right
 
-        // Roof
+        // Roof Architecture
         ctx.fillStyle = bc;
         const roofSeed = (t.x * 13 + t.y * 7) % 100;
-        if(t.zone === 'res' && t.lvl < 10 && roofSeed < 40) {
-            // Pitched Roof
+
+        if(era === 1 || (t.zone === 'res' && era === 2)) {
+            // Pitched Roof (Classic)
+            ctx.fillStyle = era === 1 ? '#a44a3f' : '#2d3436';
             ctx.beginPath();
             ctx.moveTo(x - w, baseY - h/2 - height);
             ctx.lineTo(x, baseY - h - height);
             ctx.lineTo(x + w, baseY - h/2 - height);
-            ctx.lineTo(x, baseY - height - h*1.2); // Apex
+            ctx.lineTo(x, baseY - height - h*1.4);
             ctx.closePath(); ctx.fill();
         } else if(t.zone === 'ind') {
             // Sawtooth Roof
+            ctx.fillStyle = this.shadeColor(bc, -10);
             for(let i=0; i<3; i++) {
                 ctx.beginPath();
                 let rx = x - w + (i*w*0.66);
                 ctx.moveTo(rx, baseY - h/2 - height);
-                ctx.lineTo(rx + w*0.4, baseY - h/2 - height - h*0.5);
+                ctx.lineTo(rx + w*0.4, baseY - h/2 - height - h*0.6);
                 ctx.lineTo(rx + w*0.4, baseY - h/2 - height);
                 ctx.fill();
             }
+        } else if(era === 4) {
+            // Future: Green roofs or Solar panels
+            ctx.beginPath();
+            ctx.moveTo(x, baseY - height);
+            ctx.lineTo(x + w, baseY - h/2 - height);
+            ctx.lineTo(x, baseY - h - height);
+            ctx.lineTo(x - w, baseY - h/2 - height);
+            ctx.closePath();
+            ctx.fillStyle = roofSeed < 40 ? '#3fb950' : '#1f6feb';
+            ctx.fill();
         } else {
             // Flat / Parapet
             ctx.beginPath();
@@ -1047,31 +1173,26 @@ class MetroRenderer {
             ctx.lineTo(x - w, baseY - h/2 - height);
             ctx.closePath();
             ctx.fill();
-            if(t.zone === 'sky' && roofSeed < 30) {
-                // Helipad / Antenna
-                ctx.fillStyle = '#8b949e';
-                ctx.fillRect(x - 2*this.zoom, baseY - height - 10*this.zoom, 4*this.zoom, 10*this.zoom);
-            }
         }
 
         // Windows / Architectural Details
-        if(t.zone === 'com' || t.zone === 'sky' || (t.zone === 'res' && t.lvl > 10)) {
-            const isNight = this.ambient < 0.5;
-            ctx.fillStyle = isNight ? 'rgba(255,255,150,0.8)' : 'rgba(255,255,255,0.2)';
-            if(this.sim.year % 1 > 0.5 && t.zone === 'sky') ctx.fillStyle = 'rgba(135,206,250,0.4)';
-
+        const isNight = this.ambient < 0.5;
+        if(era >= 3 || t.zone === 'sky' || t.zone === 'com') {
+            ctx.fillStyle = isNight ? 'rgba(255,255,150,0.8)' : 'rgba(255,255,255,0.3)';
             const winW = 2 * this.zoom, winH = 3 * this.zoom;
             const rows = Math.floor(height / (winH * 2.5));
             for(let i=0; i<rows; i++) {
                 let winY = baseY - height + (i+1) * winH * 2;
                 if(winY > baseY - 5) break;
-                // Left windows
                 ctx.fillRect(x - w*0.7, winY, winW, winH);
-                ctx.fillRect(x - w*0.3, winY, winW, winH);
-                // Right windows
                 ctx.fillRect(x + w*0.5, winY, winW, winH);
-                ctx.fillRect(x + w*0.2, winY, winW, winH);
             }
+        } else {
+            // Classic small windows
+            ctx.fillStyle = isNight ? '#fdfd96' : '#2d3436';
+            if(!isNight && Math.random() < 0.1) ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillRect(x - w*0.5, baseY - height + 10*this.zoom, 3*this.zoom, 4*this.zoom);
+            ctx.fillRect(x + w*0.2, baseY - height + 10*this.zoom, 3*this.zoom, 4*this.zoom);
         }
 
         // Industrial details
@@ -1082,7 +1203,7 @@ class MetroRenderer {
             ctx.fillRect(chX, chY - chH, 4*this.zoom, chH);
 
             if(Math.random() < 0.1) {
-                this.sim.particles.push({
+                sim.particles.push({
                     x: t.x + 0.5, y: t.y + 0.5,
                     vx: (Math.random()-0.5)*0.02, vy: -0.05,
                     life: 1.0, type: 'smoke',
@@ -1262,6 +1383,7 @@ const App = {
         document.getElementById('sl-inv').oninput = (e) => { this.simA.params.inv = this.simB.params.inv = e.target.value/100; document.getElementById('val-inv').innerText = e.target.value+'%'; };
         document.getElementById('sl-gre').oninput = (e) => { this.simA.params.green = this.simB.params.green = e.target.value/100; document.getElementById('val-gre').innerText = e.target.value+'%'; };
         document.getElementById('sl-sub').oninput = (e) => { this.simA.params.subsidy = this.simB.params.subsidy = e.target.value/100; document.getElementById('val-sub').innerText = e.target.value+'%'; };
+        document.getElementById('sl-tax').oninput = (e) => { this.simA.params.tax = this.simB.params.tax = e.target.value/100; document.getElementById('val-tax').innerText = e.target.value+'%'; };
         document.querySelectorAll('.evt-btn').forEach(b => {
             b.onclick = () => {
                 let act = b.classList.toggle('active');
@@ -1406,7 +1528,7 @@ const App = {
         document.getElementById('st-gini').innerText = s.stats.gini;
         document.getElementById('st-val').innerText = `$${s.stats.avgVal}`;
         document.getElementById('st-emp').innerText = `${100-s.stats.unemployment}% / ${s.stats.unemployment}%`;
-        document.getElementById('st-urb').innerText = `${s.stats.urbanPct}%`;
+        document.getElementById('st-budget').innerText = `$${Math.floor(s.stats.budget/1000).toLocaleString()}K`;
 
         let luv = document.getElementById('land-use-strip'); luv.innerHTML = '';
         const colors = {res:'#f85149', com:'#58a6ff', ind:'#484f58', nat:'#3fb950'};
