@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metropolis Lab Pro v12.0 ELITE: Scientific Urban Intelligence</title>
+    <title>Metropolis Lab Pro v12.1 PERFECT: Scientific Urban Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
         }
 
         header h1 { font-size: 1.8rem; margin: 0; color: var(--accent); font-weight: 950; letter-spacing: -1.5px; display: flex; align-items: center; justify-content: space-between; }
-        .v-badge-top { font-size: 0.6rem; background: var(--accent); color: #000; padding: 2px 10px; border-radius: 4px; font-weight: 900; }
+        .v-badge-top { font-size: 0.6rem; background: linear-gradient(135deg, var(--accent), #fff); color: #000; padding: 2px 10px; border-radius: 4px; font-weight: 900; box-shadow: 0 0 10px var(--accent-glow); }
         .tagline { font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
 
         .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
@@ -96,8 +96,9 @@
             background: rgba(13,17,23,0.8); border: 1px solid var(--accent);
             border-radius: 12px; z-index: 200; backdrop-filter: blur(10px);
             cursor: crosshair; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            pointer-events: auto;
+            pointer-events: auto; transition: 0.3s;
         }
+        #minimap:hover { border-color: #fff; transform: scale(1.05); }
         .v-panel { position: absolute; top: 30px; left: 30px; z-index: 50; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .v-badge { background: rgba(13,17,23,0.96); border: 1px solid var(--accent); padding: 10px 24px; border-radius: 6px; font-size: 0.8rem; font-weight: 950; color: var(--accent); backdrop-filter: blur(20px); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
 
@@ -106,10 +107,14 @@
 
         #hud {
             position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%);
-            width: 800px; background: rgba(22, 27, 34, 0.98); border: 1px solid var(--border);
-            border-radius: 25px; padding: 25px 45px; display: flex; align-items: center;
-            box-shadow: 0 50px 120px rgba(0,0,0,1); z-index: 1000; backdrop-filter: blur(40px);
+            width: 850px; background: rgba(13, 17, 23, 0.95); border: 1px solid var(--border);
+            border-radius: 30px; padding: 25px 45px; display: flex; align-items: center;
+            box-shadow: 0 50px 150px rgba(0,0,0,1), 0 0 40px rgba(88, 166, 255, 0.1);
+            z-index: 1000; backdrop-filter: blur(50px);
+            border-bottom: 4px solid var(--accent);
+            animation: slideUpHUD 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        @keyframes slideUpHUD { from { transform: translate(-50%, 150%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
         #news-ticker {
             position: absolute; top: 120px; left: 50%; transform: translateX(-50%);
             width: 600px; background: rgba(0,0,0,0.8); border: 1px solid var(--warning);
@@ -175,7 +180,7 @@
         <div id="news-ticker">CONEXIÓN ESTABLECIDA...</div>
         <div id="viewport-A" class="viewport">
             <div class="v-panel">
-                <div class="v-badge" style="background: var(--accent); color: #000; font-size:0.65rem; padding: 4px 12px; border-radius: 4px; width: fit-content;">SCIENTIFIC v12.0 ELITE</div>
+                <div class="v-badge" style="background: var(--accent); color: #000; font-size:0.65rem; padding: 4px 12px; border-radius: 4px; width: fit-content;">SCIENTIFIC v12.1 PERFECT</div>
                 <div class="v-badge">METRO-A: PLANIFICACIÓN INTEGRAL</div>
             </div>
             <canvas id="canvas-A"></canvas>
@@ -195,7 +200,10 @@
         <div id="inspector">
             <div class="insp-head"><span>DATA-CORE ANALYSIS</span> <span id="insp-coord" style="color:var(--text-secondary); font-size:0.8rem"></span></div>
             <div id="insp-body"></div>
-            <div class="box-title" style="margin-top:30px;">Valor Histórico de Suelo</div>
+            <div class="box-title" style="margin-top:30px;">Análisis Multivariable Histórico</div>
+            <div style="font-size: 0.6rem; color: var(--text-secondary); margin-bottom: 5px; display: flex; gap: 10px;">
+                <span style="color:#58a6ff">● Valor</span> <span style="color:#f85149">● Pop</span> <span style="color:#3fb950">● Calidad</span>
+            </div>
             <canvas id="plot-chart" class="history-cvs"></canvas>
             <button onclick="document.getElementById('inspector').style.display='none'" style="width:100%; margin-top:30px; padding:18px; font-weight:950; background: var(--border); border-radius: 12px;">CERRAR ANÁLISIS</button>
         </div>
@@ -218,7 +226,7 @@
 
     <div id="sidebar">
         <header>
-            <h1>Metropolis Pro <span class="v-badge-top">v12.0 ELITE</span></h1>
+            <h1>Metropolis Pro <span class="v-badge-top">v12.1 PERFECT</span></h1>
             <div class="tagline">System Dynamics & Urban Evolution Lab</div>
         </header>
 
@@ -227,6 +235,7 @@
             <div class="stat-card"><span class="stat-label">PIB Metropolitano</span><span id="st-gdp" class="stat-value">$0M</span></div>
             <div class="stat-card"><span class="stat-label">AQI (Calidad Aire)</span><span id="st-poll" class="stat-value">100%</span></div>
             <div class="stat-card hl-green"><span class="stat-label">Felicidad Urbana</span><span id="st-hap" class="stat-value">50%</span></div>
+            <div class="stat-card"><span class="stat-label">Índice Sostenibilidad</span><span id="st-sus" class="stat-value">80%</span></div>
             <div class="stat-card"><span class="stat-label">Coef. Gini (Desigualdad)</span><span id="st-gini" class="stat-value">0.3</span></div>
             <div class="stat-card"><span class="stat-label">Precio Suelo (Media)</span><span id="st-val" class="stat-value">$100</span></div>
             <div class="stat-card"><span class="stat-label">Empleo / Paro</span><span id="st-emp" class="stat-value">0%</span></div>
@@ -247,9 +256,25 @@
         </div>
 
         <section>
+            <h2>Herramientas de Planificación</h2>
+            <div class="btn-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <button class="brush-btn" data-type="res" style="border-left: 4px solid #f85149;">Resid.</button>
+                <button class="brush-btn" data-type="com" style="border-left: 4px solid #58a6ff;">Comer.</button>
+                <button class="brush-btn" data-type="ind" style="border-left: 4px solid #3fb950;">Indus.</button>
+                <button class="brush-btn" data-type="park" style="border-left: 4px solid #2ea043;">Parque</button>
+                <button class="brush-btn" data-type="road" style="border-left: 4px solid #8b949e;">Vial</button>
+                <button class="brush-btn" data-type="hosp" style="border-left: 4px solid #ffffff;">Hosp.</button>
+                <button class="brush-btn" data-type="univ" style="border-left: 4px solid #3fb950;">Univ.</button>
+                <button class="brush-btn" data-type="station" style="border-left: 4px solid #d29922;">Station</button>
+                <button class="brush-btn" data-type="clear" style="border-left: 4px solid #f85149;">Limpiar</button>
+            </div>
+        </section>
+
+        <section>
             <h2>Capas Geo-Analíticas</h2>
             <div class="btn-grid">
                 <button class="layer-btn active" data-layer="normal">Normal</button>
+                <button class="layer-btn" data-layer="subway">Red Metro</button>
                 <button class="layer-btn" data-layer="density">Densidad</button>
                 <button class="layer-btn" data-layer="value">Land Value</button>
                 <button class="layer-btn" data-layer="traffic">Flujo Tráfico</button>
@@ -321,7 +346,7 @@
 
 <script>
 /**
- * METROPOLIS ENGINE v12.0 ELITE
+ * METROPOLIS ENGINE v12.1 PERFECT EDITION
  * Advanced Simulation of Urban Systems, Economy & Emergence.
  * Optimized for professional urban planning education.
  */
@@ -367,6 +392,8 @@ class Tile {
         this.prestige = 0;
         this.distId = -1;
         this.history = [];
+        this.historyPop = [];
+        this.historyPoll = [];
         this.init();
     }
     init() {
@@ -400,6 +427,7 @@ class CitySimulation {
         this.events = { indus: false, rail: false, boom: false, crisis: false, pandemic: false, climate: false, war: false, recon: false, resources: false };
         this.seaLevel = 0.28;
         this.dayCycle = 0; // 0 to 1
+        this.clouds = [];
         this.init();
     }
 
@@ -449,16 +477,42 @@ class CitySimulation {
         this.dayCycle = (this.year * 24) % 24 / 24; // Normalized 0-1 for a 24h cycle
         const cy = Math.floor(this.year);
 
-        this.calculateSystemRealignment();
+        // Throttle heavy logic: Run every 0.2 years to maintain 60FPS
+        if(cy > py || Math.floor(this.year * 5) > Math.floor((this.year - dt) * 5)) {
+            this.calculateSystemRealignment();
+        }
         this.growthPass(dt);
         this.updateVehicles(dt);
         this.updateParticles(dt);
+        this.updateAtmosphere(dt);
 
         if(this.events.climate) this.seaLevel += 0.00025;
 
         if(cy > py) {
             this.calculateStats();
             this.updateDemand();
+                this.generateNewsHeadline(cy);
+            }
+        }
+
+        generateNewsHeadline(year) {
+            const headlines = [
+                {y: 1810, t: "Primeras caravanas llegan al valle fértil."},
+                {y: 1850, t: "Inauguración de la Gran Estación Central."},
+                {y: 1890, t: "La industria del carbón impulsa la economía local."},
+                {y: 1920, t: "Nuevas ordenanzas municipales regulan el comercio."},
+                {y: 1950, t: "Boom de posguerra: Se expanden los suburbios."},
+                {y: 1980, t: "El sector financiero se traslada a los nuevos rascacielos."},
+                {y: 2010, t: "Movimientos ciudadanos exigen más espacios verdes."},
+                {y: 2040, t: "Sistemas inteligentes optimizan el tráfico urbano."},
+                {y: 2080, t: "Hacia una metrópolis 100% sostenible y conectada."}
+            ];
+            const h = headlines.find(x => x.y === year);
+            if(h) {
+                const ticker = document.getElementById('news-ticker');
+                ticker.innerText = `NOTICIA > ${h.t}`;
+                ticker.style.display = 'block';
+                this.newsTimer = 400;
         }
     }
 
@@ -489,6 +543,14 @@ class CitySimulation {
             });
         }
 
+        // Ship Logic (Puerto / River)
+        if(this.vehicles.filter(v=>v.type==='ship').length < 5 && Math.random() < 0.005) {
+            this.vehicles.push({
+                x: 0, y: GH*0.4 + Math.random()*10, target: {x: GW-1, y: GH*0.4 + Math.random()*10},
+                speed: 0.015, color: '#8b949e', type: 'ship'
+            });
+        }
+
         // Vehicle logic: move between tiles with roads
         if(this.vehicles.length < this.stats.pop / 300 && Math.random() < 0.2) {
             // Spawn new vehicle at a random road
@@ -515,6 +577,28 @@ class CitySimulation {
             }
         });
         if(this.vehicles.length > 500) this.vehicles.shift();
+    }
+
+    updateAtmosphere(dt) {
+        if(this.clouds.length < 8 && Math.random() < 0.01) {
+            this.clouds.push({
+                x: -10, y: Math.random() * GH,
+                w: 15 + Math.random() * 20,
+                h: 5 + Math.random() * 10,
+                speed: 0.02 + Math.random() * 0.05,
+                opacity: 0.1 + Math.random() * 0.2
+            });
+        }
+        this.clouds.forEach(c => c.x += c.speed);
+        this.clouds = this.clouds.filter(c => c.x < GW + 20);
+
+        // Bird particles
+        if(Math.random() < 0.05) {
+            this.particles.push({
+                x: -5, y: Math.random()*GH, vx: 0.05+Math.random()*0.1, vy: (Math.random()-0.5)*0.02,
+                life: 1.0, type: 'bird', wing: 0
+            });
+        }
     }
 
     updateParticles(dt) {
@@ -568,7 +652,7 @@ class CitySimulation {
         // First pass: locate specialized centers and infrastructure hubs
         for(let y=0; y<GH; y++) for(let x=0; x<GW; x++) {
             let t = this.grid[y][x];
-            if(t.zone === 'hosp' || t.zone === 'univ' || t.zone === 'sky') {
+            if(t.zone === 'hosp' || t.zone === 'univ' || t.zone === 'sky' || t.zone === 'station') {
                 hubs.push({x, y, type: t.zone});
             }
             if(this.events.rail && Math.abs(y - GH/2) < 1 && x % 20 === 0) {
@@ -599,10 +683,11 @@ class CitySimulation {
             let instBonus = 0;
             hubs.forEach(inst => {
                 let d = Math.sqrt((x-inst.x)**2 + (y-inst.y)**2);
-                if(d < 8) {
-                    if(inst.type === 'univ') instBonus += (8-d)*25;
-                    if(inst.type === 'hosp') instBonus += (8-d)*15;
-                    if(inst.type === 'sky') instBonus += (8-d)*40;
+                if(d < 12) {
+                    if(inst.type === 'univ') instBonus += (12-d)*35;
+                    if(inst.type === 'hosp') instBonus += (12-d)*25;
+                    if(inst.type === 'sky') instBonus += (12-d)*50;
+                    if(inst.type === 'station') instBonus += (12-d)*45;
                 }
             });
 
@@ -740,8 +825,14 @@ class CitySimulation {
                 let bin = Math.min(11, Math.floor(Math.random()*12));
                 this.stats.ages[bin] += t.pop/150;
             } else { use.nat++; }
-            if(t.history.length > 60) t.history.shift();
+            if(t.history.length > 60) {
+                t.history.shift();
+                t.historyPop.shift();
+                t.historyPoll.shift();
+            }
             t.history.push(t.value);
+            t.historyPop.push(t.pop);
+            t.historyPoll.push(100 - t.pollution);
         }));
         this.stats.pop = Math.floor(p);
         this.stats.gdp = Math.floor(g * (1 + p/15000));
@@ -794,21 +885,32 @@ class MetroRenderer {
         this.cvs = cvs; this.ctx = cvs.getContext('2d', {alpha: false});
         this.sim = sim; this.labels = labels;
         this.layer = 'normal';
+        this.brush = null;
         this.camX = 0; this.camY = 0; this.zoom = 1.0;
-        this.isDragging = false; this.lastMouse = {x:0, y:0};
+        this.isDragging = false; this.isPainting = false; this.lastMouse = {x:0, y:0};
         this.resize();
         this.setupInteraction();
     }
 
     setupInteraction() {
-        this.cvs.addEventListener('mousedown', (e) => { this.isDragging = true; this.lastMouse = {x:e.clientX, y:e.clientY}; });
-        window.addEventListener('mouseup', () => this.isDragging = false);
+        this.cvs.addEventListener('mousedown', (e) => {
+            if(this.brush) {
+                this.isPainting = true;
+                this.applyBrush(e);
+            } else {
+                this.isDragging = true;
+            }
+            this.lastMouse = {x:e.clientX, y:e.clientY};
+        });
+        window.addEventListener('mouseup', () => { this.isDragging = false; this.isPainting = false; });
         window.addEventListener('mousemove', (e) => {
             if(this.isDragging) {
                 this.camX += (e.clientX - this.lastMouse.x);
                 this.camY += (e.clientY - this.lastMouse.y);
                 this.lastMouse = {x:e.clientX, y:e.clientY};
                 this.drawDistrictLabels();
+            } else if(this.isPainting) {
+                this.applyBrush(e);
             }
         });
         this.cvs.addEventListener('wheel', (e) => {
@@ -844,6 +946,25 @@ class MetroRenderer {
         };
     }
 
+    applyBrush(e) {
+        let r = this.cvs.getBoundingClientRect();
+        const {x, y} = this.invIso(e.clientX - r.left, e.clientY - r.top);
+        if(x < 0 || x >= GW || y < 0 || y >= GH) return;
+        let t = this.sim.grid[y][x];
+        const yr = Math.floor(this.sim.year);
+        if(this.brush === 'res') { t.zone = 'res'; t.lvl = 1; t.pop = 100; t.yearBuilt = yr; }
+        else if(this.brush === 'com') { t.zone = 'com'; t.lvl = 1; t.yearBuilt = yr; }
+        else if(this.brush === 'ind') { t.zone = 'ind'; t.lvl = 1; t.yearBuilt = yr; }
+        else if(this.brush === 'park') { t.zone = null; t.terrain = 'forest'; t.distId = 6; }
+        else if(this.brush === 'road') { t.road = 3; }
+        else if(this.brush === 'hosp') { t.zone = 'hosp'; t.lvl = 1; t.yearBuilt = yr; }
+        else if(this.brush === 'univ') { t.zone = 'univ'; t.lvl = 1; t.yearBuilt = yr; }
+        else if(this.brush === 'station') { t.road = 2; t.zone = null; // Stations are hubs
+            this.sim.particles.push({x: t.x, y: t.y, life: 1, type: 'flash', color: '#d29922'});
+        }
+        else if(this.brush === 'clear') { t.zone = null; t.road = 0; t.pop = 0; t.lvl = 0; t.terrain = 'grass'; }
+    }
+
     invIso(px, py) {
         let dx = px - this.camX, dy = py - this.camY;
         let x = (dx / (this.tw / 2) + dy / (this.th / 2)) / 2;
@@ -866,10 +987,8 @@ class MetroRenderer {
         const {ctx, sim} = this;
         this.tw = 32 * this.zoom; this.th = 16 * this.zoom;
 
-        // Update Minimap if primary renderer
         if(this.cvs.id === 'canvas-A') this.renderMinimap();
 
-        // Day/Night lighting colors
         const hour = sim.dayCycle * 24;
         let bg = '#010204';
         let ambient = 1.0;
@@ -884,9 +1003,22 @@ class MetroRenderer {
         ctx.fillStyle = bg; ctx.fillRect(0,0,this.cvs.width,this.cvs.height);
         this.ambient = ambient;
 
-        // Atmosphere: Smog haze
-        if(sim.stats.poll > 30) {
-            ctx.fillStyle = `rgba(100, 100, 80, ${Math.min(0.4, (sim.stats.poll-30)/200)})`;
+        // Drawing clouds (under-shadow effect)
+        sim.clouds.forEach(c => {
+            const {px, py} = this.iso(c.x, c.y);
+            ctx.fillStyle = `rgba(0, 0, 0, ${c.opacity * 0.5})`;
+            ctx.beginPath();
+            ctx.ellipse(px, py + 100 * this.zoom, c.w * this.tw/2, c.h * this.th/2, 0, 0, Math.PI*2);
+            ctx.fill();
+        });
+
+        // Atmosphere: Smog haze (more dynamic)
+        if(sim.stats.poll > 20) {
+            const smogGrad = ctx.createLinearGradient(0,0,0,this.cvs.height);
+            const smogAlpha = Math.min(0.5, (sim.stats.poll-20)/150);
+            smogGrad.addColorStop(0, `rgba(140, 130, 110, ${smogAlpha})`);
+            smogGrad.addColorStop(1, `rgba(40, 40, 50, ${smogAlpha * 0.5})`);
+            ctx.fillStyle = smogGrad;
             ctx.fillRect(0,0,this.cvs.width,this.cvs.height);
         }
 
@@ -900,9 +1032,10 @@ class MetroRenderer {
                     if(px < -100 || px > this.cvs.width + 100 || py < -100 || py > this.cvs.height + 300) continue;
 
                     this.drawTerrainIso(t, px, py);
-                    if(this.layer === 'normal') {
+                    if(this.layer === 'normal' || this.layer === 'subway') {
                         this.drawRoadsIso(t, px, py);
                         this.drawBuildingIso(t, px, py);
+                        if(this.layer === 'subway') this.drawSubwayOverlay(t, px, py);
                     } else {
                         this.drawScientificHeatmapIso(t, px, py);
                     }
@@ -946,6 +1079,16 @@ class MetroRenderer {
                 ctx.fillStyle = v.color;
                 ctx.fillRect(px - 10*this.zoom, py - 2*this.zoom, 20*this.zoom, 4*this.zoom);
                 ctx.fillStyle = '#fff'; ctx.fillRect(px + 8*this.zoom, py - 1*this.zoom, 2*this.zoom, 2*this.zoom);
+            } else if(v.type === 'ship') {
+                ctx.fillStyle = v.color;
+                ctx.beginPath();
+                ctx.moveTo(px - 15*this.zoom, py);
+                ctx.lineTo(px, py + 6*this.zoom);
+                ctx.lineTo(px + 15*this.zoom, py);
+                ctx.lineTo(px, py - 6*this.zoom);
+                ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#484f58';
+                ctx.fillRect(px - 4*this.zoom, py - 6*this.zoom, 10*this.zoom, 6*this.zoom);
             } else {
                 ctx.fillStyle = v.color;
                 ctx.beginPath();
@@ -959,7 +1102,17 @@ class MetroRenderer {
 
         // Particle layer
         sim.particles.forEach(p => {
-            if(p.type === 'migrant') {
+            if(p.type === 'bird') {
+                const {px, py} = this.iso(p.x, p.y);
+                p.x += p.vx; p.y += p.vy; p.wing += 0.2;
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(px - 2*this.zoom, py - 40*this.zoom + Math.sin(p.wing)*2);
+                ctx.lineTo(px, py - 40*this.zoom);
+                ctx.lineTo(px + 2*this.zoom, py - 40*this.zoom + Math.sin(p.wing)*2);
+                ctx.stroke();
+                if(p.x > GW + 5) p.life = 0;
+            } else if(p.type === 'migrant') {
                 const {px, py} = this.iso(p.x, p.y);
                 ctx.shadowBlur = 12 * this.zoom; ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 0.5)`;
                 ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.life})`;
@@ -983,14 +1136,21 @@ class MetroRenderer {
 
     drawTerrainIso(t, x, y) {
         let c = '#161b22';
-        if(t.terrain==='water') c='#0d1b2a';
-        else if(t.terrain==='forest') c='#0f2e21';
+        const hOffset = (t.e - 0.5) * 40 * this.zoom;
+        const ctx = this.ctx;
+
+        if(t.terrain==='water') {
+            // Multi-Frequency Water Shader
+            const r1 = Math.sin(this.sim.year * 4.2 + t.x * 0.45 + t.y * 0.6) * 12;
+            const r2 = Math.cos(this.sim.year * 2.8 + t.x * 0.22 - t.y * 0.3) * 8;
+            const depth = (1 - t.e) * 45;
+            c = `rgb(${8 + depth/4}, ${28 + r1 + r2 + depth/2}, ${45 + r1 + depth})`;
+        }
+        else if(t.terrain==='forest') c='#0d2a1d';
         else if(t.terrain==='mountain') c='#30363d';
         else if(t.terrain==='hill') c='#21262d';
         else c = '#1a1f26';
 
-        const hOffset = (t.e - 0.5) * 40 * this.zoom;
-        const ctx = this.ctx;
         ctx.beginPath();
         ctx.moveTo(x, y - hOffset);
         ctx.lineTo(x + this.tw/2, y + this.th/2 - hOffset);
@@ -999,6 +1159,30 @@ class MetroRenderer {
         ctx.closePath();
         ctx.fillStyle = c;
         ctx.fill();
+
+        // High-End Micro-textures for Ground
+        if(this.zoom > 1.8 && t.terrain !== 'water') {
+            ctx.fillStyle = 'rgba(255,255,255,0.015)';
+            ctx.fillRect(x-2, y+this.th/2, 4, 1);
+            ctx.fillRect(x+4, y+this.th/2+2, 2, 1);
+        }
+
+        // Advanced Water Specular & Reflection
+        if(t.terrain === 'water') {
+            const spec = Math.max(0, Math.sin(this.sim.year * 3.5 + t.x * 0.15 + t.y * 0.1));
+            ctx.strokeStyle = `rgba(160, 240, 255, ${0.2 * spec})`;
+            ctx.lineWidth = 2 * this.zoom;
+            ctx.stroke();
+
+            // Directional Light Reflection (Sun/Moon)
+            const sunGlow = Math.max(0, Math.sin(this.sim.dayCycle * Math.PI * 2));
+            if(sunGlow > 0.1) {
+                const grad = ctx.createRadialGradient(x, y, 0, x, y, this.tw * 0.8);
+                grad.addColorStop(0, `rgba(255, 250, 200, ${0.08 * sunGlow})`);
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = grad; ctx.fill();
+            }
+        }
 
         // Procedural Forestation
         if(t.terrain === 'forest' && !t.zone) {
@@ -1019,25 +1203,43 @@ class MetroRenderer {
     drawRoadsIso(t, x, y) {
         const ctx = this.ctx;
         if(t.road > 0) {
-            const rw = this.tw * 0.95, rh = this.th * 0.95;
+            const rw = this.tw * (t.road === 3 ? 1.0 : 0.92), rh = this.th * (t.road === 3 ? 1.0 : 0.92);
             ctx.beginPath();
             ctx.moveTo(x, y + this.th/2 - rh/2);
             ctx.lineTo(x + rw/2, y + this.th/2);
             ctx.lineTo(x, y + this.th/2 + rh/2);
             ctx.lineTo(x - rw/2, y + this.th/2);
             ctx.closePath();
-            ctx.fillStyle = t.road === 3 ? '#0a0c10' : (t.road === 2 ? '#21262d' : '#30363d');
+
+            // Professional Road Hierarchy Aesthetics
+            let roadColor = '#30363d'; // Path
+            if(t.road === 2) roadColor = '#1a1f26'; // Avenue
+            if(t.road === 3) roadColor = '#0d1117'; // Highway
+
+            ctx.fillStyle = roadColor;
             ctx.fill();
 
-            if(t.road >= 2) {
+            if(t.road === 2) { // Avenue Markings
                 ctx.strokeStyle = 'rgba(255,255,255,0.15)';
                 ctx.lineWidth = 1;
-                ctx.setLineDash([4 * this.zoom, 4 * this.zoom]);
+                ctx.setLineDash([4 * this.zoom, 6 * this.zoom]);
                 ctx.beginPath();
                 ctx.moveTo(x - rw/4, y + this.th/2 - rh/4);
                 ctx.lineTo(x + rw/4, y + this.th/2 + rh/4);
                 ctx.stroke();
                 ctx.setLineDash([]);
+            } else if(t.road === 3) { // Highway Markings (Double Yellow / White lines)
+                ctx.strokeStyle = '#d29922'; ctx.lineWidth = 2 * this.zoom;
+                ctx.beginPath();
+                ctx.moveTo(x - rw/10, y + this.th/2 - rh/10);
+                ctx.lineTo(x + rw/10, y + this.th/2 + rh/10);
+                ctx.stroke();
+
+                // Guardrails
+                ctx.strokeStyle = '#484f58'; ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x - rw/2, y + this.th/2 - rh/2); ctx.lineTo(x - rw/2 + 4*this.zoom, y + this.th/2 - rh/2 + 2*this.zoom);
+                ctx.stroke();
             }
         }
 
@@ -1070,6 +1272,12 @@ class MetroRenderer {
         const seed = (t.x * 31 + t.y * 17) % 100;
         const year = t.yearBuilt || 1800;
 
+        // Urban Decals: Small details on ground
+        if(this.zoom > 1.5) {
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(x - 5, y + this.th - 5, 10, 2);
+        }
+
         // Eras:
         // 1: 1800-1880 (Neoclassical/Colonial) - Stone, red/brown pitched roofs
         // 2: 1880-1940 (Industrial/Eclectic) - Red brick, dark grey roofs, chimneys
@@ -1099,6 +1307,7 @@ class MetroRenderer {
             bc = era === 1 ? '#6d4c41' : '#484f58';
         } else if(t.zone === 'hosp') bc = '#fff';
         else if(t.zone === 'univ') bc = '#3fb950';
+        else if(t.zone === 'station') bc = '#d29922';
 
         // Apply Ambient light to color
         bc = this.shadeColor(bc, (this.ambient - 1.0) * 80);
@@ -1113,6 +1322,15 @@ class MetroRenderer {
 
         const w = this.tw * wMult, h = this.th * hMult;
         const baseY = y + this.th/2;
+
+        // Scaffolding for new buildings
+        if(this.sim.year - t.yearBuilt < 3 && t.yearBuilt > 1800) {
+            ctx.strokeStyle = '#d29922'; ctx.lineWidth = 1;
+            for(let i=0; i<3; i++) {
+                ctx.strokeRect(x - w, baseY - (i*height/3), w*2, 2);
+            }
+            return;
+        }
 
         // Draw Shadows
         ctx.fillStyle = 'rgba(0,0,0,0.3)';
@@ -1217,6 +1435,56 @@ class MetroRenderer {
             ctx.fillStyle = '#f85149';
             ctx.fillRect(x - 2*this.zoom, baseY - height - 10*this.zoom, 4*this.zoom, 10*this.zoom);
             ctx.fillRect(x - 5*this.zoom, baseY - height - 7*this.zoom, 10*this.zoom, 4*this.zoom);
+        }
+        if(t.zone === 'station') {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(x - 6*this.zoom, baseY - height - 5*this.zoom, 12*this.zoom, 5*this.zoom);
+            ctx.fillStyle = '#000'; ctx.font = 'bold 5px sans-serif';
+            ctx.fillText('S', x - 2*this.zoom, baseY - height - 1*this.zoom);
+        }
+
+        // District Specialization markers (V12.1)
+        if(this.zoom > 1.3) {
+            ctx.textAlign = 'center';
+            if(t.distId === 0 && (t.zone === 'com' || t.zone === 'sky')) {
+                ctx.fillStyle = 'rgba(88, 166, 255, 0.7)'; ctx.font = 'bold 9px JetBrains Mono';
+                ctx.fillText('CBD', x, baseY - height - 8);
+            }
+            if(t.distId === 7 && t.zone === 'ind') {
+                ctx.fillStyle = 'rgba(139, 148, 158, 0.7)'; ctx.font = 'bold 9px JetBrains Mono';
+                ctx.fillText('IND', x, baseY - height - 8);
+            }
+            if(t.distId === 6 && t.terrain === 'forest') {
+                ctx.fillStyle = 'rgba(63, 185, 80, 0.5)'; ctx.font = 'bold 9px JetBrains Mono';
+                ctx.fillText('PARK', x, baseY - height - 5);
+            }
+            ctx.textAlign = 'left';
+        }
+    }
+
+    drawSubwayOverlay(t, x, y) {
+        if(t.road < 2) return;
+        const ctx = this.ctx;
+        ctx.strokeStyle = 'rgba(63, 185, 80, 0.6)';
+        ctx.lineWidth = 4 * this.zoom;
+        ctx.setLineDash([10 * this.zoom, 5 * this.zoom]);
+        ctx.beginPath();
+        ctx.moveTo(x - this.tw/2, y + this.th/2);
+        ctx.lineTo(x + this.tw/2, y + this.th/2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Station Glow
+        if(t.x % 10 === 0 && t.y % 10 === 0) {
+            ctx.shadowBlur = 15; ctx.shadowColor = '#3fb950';
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(x, y + this.th/2, 6 * this.zoom, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        if(t.x % 10 === 0 && t.y % 10 === 0) {
+            ctx.fillStyle = '#fff';
+            ctx.beginPath(); ctx.arc(x, y + this.th/2, 5 * this.zoom, 0, Math.PI*2); ctx.fill();
         }
     }
 
@@ -1326,6 +1594,17 @@ const App = {
                 b.classList.add('active'); this.rendA.layer = this.rendB.layer = b.dataset.layer;
             };
         });
+        document.querySelectorAll('.brush-btn').forEach(b => {
+            b.onclick = () => {
+                const wasActive = b.classList.contains('active');
+                document.querySelectorAll('.brush-btn').forEach(x => x.classList.remove('active'));
+                if(!wasActive) {
+                    b.classList.add('active'); this.rendA.brush = this.rendB.brush = b.dataset.type;
+                } else {
+                    this.rendA.brush = this.rendB.brush = null;
+                }
+            };
+        });
         const handleInspect = (e, sim, rend) => {
             let r = e.target.getBoundingClientRect();
             const {x, y} = rend.invIso(e.clientX - r.left, e.clientY - r.top);
@@ -1340,7 +1619,7 @@ const App = {
                     if(z && !services.includes(z)) services.push(z);
                 }
             }
-            const sMap = {res:'Residencial', com:'Comercial', ind:'Industrial', sky:'Rascacielos', univ:'Universidad', hosp:'Hospital'};
+            const sMap = {res:'Residencial', com:'Comercial', ind:'Industrial', sky:'Rascacielos', univ:'Universidad', hosp:'Hospital', station: 'Estación'};
 
             let historyText = t.yearBuilt ? `Estructura erigida en ${t.yearBuilt}. ` : 'Terreno virgen. ';
             if(sim.events.rail && t.yearBuilt > 1850 && t.yearBuilt < 1880) historyText += 'Auge ferroviario. ';
@@ -1372,11 +1651,20 @@ const App = {
         document.getElementById('btn-export').onclick = () => this.exportStatistics();
         document.getElementById('btn-reset').onclick = () => this.hardReset();
         document.querySelector('.close-x').onclick = () => document.getElementById('overlay').style.display='none';
-        document.getElementById('master-timeline').oninput = (e) => {
-            let targetY = parseInt(e.target.value);
-            if(targetY < this.simA.year) this.hardReset();
-            while(this.simA.year < targetY) { this.simA.update(1); this.simB.update(1); }
+        const jumpTo = (targetY) => {
+            if(this.simA.year >= targetY) return;
+            const start = performance.now();
+            // Process in chunks of 30ms to keep UI responsive
+            while(this.simA.year < targetY && performance.now() - start < 30) {
+                this.simA.update(1); this.simB.update(1);
+            }
             this.updateUI();
+            if(this.simA.year < targetY) requestAnimationFrame(() => jumpTo(targetY));
+        };
+        document.getElementById('master-timeline').onchange = (e) => {
+            let targetY = parseInt(e.target.value);
+            if(targetY < this.simA.year) { this.hardReset(); }
+            jumpTo(targetY);
         };
         document.getElementById('sl-nat').oninput = (e) => { this.simA.params.nat = this.simB.params.nat = e.target.value/100; document.getElementById('val-nat').innerText = e.target.value+'%'; };
         document.getElementById('sl-mig').oninput = (e) => { this.simA.params.mig = this.simB.params.mig = e.target.value/100; document.getElementById('val-mig').innerText = e.target.value+'%'; };
@@ -1417,13 +1705,24 @@ const App = {
         this.rendA.drawDistrictLabels(); this.rendB.drawDistrictLabels();
         this.updateUI();
     },
-    renderPlotChart(data) {
+    renderPlotChart(t) {
         let cv = document.getElementById('plot-chart'); let ctx = cv.getContext('2d');
         ctx.clearRect(0,0,cv.width,cv.height);
-        ctx.strokeStyle = '#58a6ff'; ctx.lineWidth=4; ctx.beginPath();
-        let step = cv.width/data.length; let max = Math.max(...data, 100);
-        data.forEach((v,i) => { let x=i*step, y=cv.height-(v/max)*cv.height; if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); });
-        ctx.stroke();
+
+        const drawLine = (data, color, maxVal) => {
+            if(data.length < 2) return;
+            ctx.strokeStyle = color; ctx.lineWidth=2; ctx.beginPath();
+            let step = cv.width/(data.length-1);
+            data.forEach((v,i) => {
+                let x=i*step, y=cv.height-(v/maxVal)*cv.height;
+                if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            });
+            ctx.stroke();
+        };
+
+        drawLine(t.history, '#58a6ff', Math.max(...t.history, 1000));
+        drawLine(t.historyPop, '#f85149', Math.max(...t.historyPop, 500));
+        drawLine(t.historyPoll, '#3fb950', 100);
     },
     renderTrendChart() {
         const cv = document.getElementById('main-trend-chart');
@@ -1489,9 +1788,45 @@ const App = {
                 </div>
             </div>
 
+            <div style="margin-top: 60px;">
+                <h3 style="color: var(--accent); font-size: 2.5rem; letter-spacing: -2px;">Casos de Estudio Comparados</h3>
+                <div class="edu-grid">
+                    <div class="edu-card" style="border-left: 5px solid var(--success);">
+                        <h4 style="margin-top:0">Plan Cerdà (Barcelona)</h4>
+                        <p>Ejemplo de <strong>Planificación Integral</strong>. La cuadrícula perfecta con chaflanes permite una ventilación óptima, luz solar y una distribución equitativa de servicios. En el simulador, esto se refleja en la Ciudad A con alta inversión en redes.</p>
+                    </div>
+                    <div class="edu-card" style="border-left: 5px solid var(--danger);">
+                        <h4 style="margin-top:0">Crecimiento de Londres (S. XIX)</h4>
+                        <p>Crecimiento <strong>Espontáneo</strong> y radial. Londres se expandió absorbiendo aldeas circundantes, creando una morfología compleja de calles estrechas que luego requirió intervenciones masivas para el alcantarillado y el metro.</p>
+                    </div>
+                </div>
+            </div>
+
             <div style="margin-top: 60px; padding: 40px; background: rgba(88, 166, 255, 0.1); border-radius: 20px; border: 1px solid var(--accent);">
                 <h4 style="color: var(--accent); margin-top: 0; font-size: 1.8rem;">Propuesta de Experimento</h4>
                 <p style="font-size: 1.2rem; line-height: 1.6;">Active el <strong>Modo Dual</strong>. En la Ciudad A, priorice la <strong>Regulación Ambiental</strong>. En la Ciudad B, fomente una <strong>Revolución Industrial</strong> agresiva. Compare el Coeficiente de Gini y la Esperanza de Vida (Pirámide Poblacional) al llegar al año 2060.</p>
+            </div>
+
+            <div style="margin-top: 60px;">
+                <h3 style="color: var(--accent); font-size: 2.5rem; letter-spacing: -2px;">Glosario de Términos Profesionales</h3>
+                <div class="edu-grid">
+                    <div class="edu-card">
+                        <h4>CBD (Central Business District)</h4>
+                        <p>El núcleo geográfico y comercial de una ciudad. Se caracteriza por la mayor densidad de empleo y los valores de suelo más altos (Bid-Rent peak).</p>
+                    </div>
+                    <div class="edu-card">
+                        <h4>Externalidades de Aglomeración</h4>
+                        <p>Beneficios que las empresas obtienen al estar cerca unas de otras: acceso a un mercado laboral especializado y reducción de costes de transporte.</p>
+                    </div>
+                    <div class="edu-card">
+                        <h4>Segregación Socio-Espacial</h4>
+                        <p>La separación física de diferentes grupos sociales en el espacio urbano, a menudo impulsada por el mercado inmobiliario y la falta de vivienda pública.</p>
+                    </div>
+                    <div class="edu-card">
+                        <h4>Metabolismo Urbano</h4>
+                        <p>Modelo que facilita la comprensión de las ciudades como ecosistemas complejos que consumen recursos y generan residuos/emisiones.</p>
+                    </div>
+                </div>
             </div>
         `;
     },
@@ -1525,6 +1860,7 @@ const App = {
         document.getElementById('st-gdp').innerText = `$${(s.stats.gdp/1000).toFixed(1)}M`;
         document.getElementById('st-poll').innerText = (100-s.stats.poll)+'%';
         document.getElementById('st-hap').innerText = Math.floor(s.stats.happiness)+'%';
+        document.getElementById('st-sus').innerText = Math.floor(80 + (s.params.green*20) - (s.stats.poll/2))+'%';
         document.getElementById('st-gini').innerText = s.stats.gini;
         document.getElementById('st-val').innerText = `$${s.stats.avgVal}`;
         document.getElementById('st-emp').innerText = `${100-s.stats.unemployment}% / ${s.stats.unemployment}%`;
